@@ -1,5 +1,5 @@
 import './App.css'
-import { MapPin, Calendar, Users, TrendingUp, Clock, CheckCircle2 } from "lucide-react"
+import { MapPin, Calendar, Users, Clock, CheckCircle2 } from "lucide-react"
 
 const proximasReservas = [
   { id: 1, cancha: "Cancha Principal", hora: "16:00 - 17:00", cliente: "Juan Pérez" },

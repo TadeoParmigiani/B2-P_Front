@@ -1,6 +1,7 @@
 // import { useEffect } from "react";
 import { createBrowserRouter, RouterProvider } from "react-router";
 import App from "./App";
+import { LoginForm } from "./pages/login/login";
 import ErrorPage from "./components/ErrorPage";
 
 
@@ -42,8 +43,8 @@ const router = createBrowserRouter([
      ],
   },
   {
-    //  path: "/login",
-    //  element: <Login />,
+      path: "/login",
+      element: <LoginForm />,
   },
 ]);
 
