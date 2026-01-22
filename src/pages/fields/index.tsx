@@ -25,7 +25,7 @@ export const FieldsPage = () => {
     setFields(mockFields);
   }, []);
 
-  // Función para seleccionar/deseleccionar cancha
+ // Función para seleccionar/deseleccionar cancha
   const toggleSelectField = (id: string) => {
     if (selectedFieldId === id) {
       setSelectedFieldId(null);
@@ -33,4 +33,25 @@ export const FieldsPage = () => {
       setSelectedFieldId(id);
     }
   };
-  
+
+  return (
+    <div className="p-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+      {fields.map(field => (
+        <Card
+          key={field.id}
+          className={`cursor-pointer border-2 ${selectedFieldId === field.id ? 'border-green-500' : 'border-transparent'}`}
+          onClick={() => toggleSelectField(field.id)}
+        >
+          <CardHeader>
+            <CardTitle>{field.name}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p>Tipo: {field.type}</p>
+            <p>Precio por hora: ${field.pricePerHour}</p>
+            <p>Estado: {field.isActive ? 'Activa' : 'Inactiva'}</p>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  );
+};

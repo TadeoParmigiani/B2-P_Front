@@ -3,7 +3,7 @@ import { createBrowserRouter, RouterProvider } from "react-router";
 import App from "./App";
 import { LoginForm } from "./pages/login/login";
 import ErrorPage from "./components/ErrorPage";
-
+import {FieldsPage}from "./pages/fields/index";
 
 import Layout from "./Layout";
 
@@ -67,6 +67,30 @@ export const AppWithObserver = () => {
 //       </div>
 //     );
 //   }
+const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <Layout />,
+    children: [
+      {
+        index: true,
+        Component: App,
+        errorElement: <ErrorPage />,
+      },
+      {
+        path: "filds",          // 👈 ESTA ES LA RUTA QUE QUERÉS
+        Component: FieldsPage, // 👈 ESTE ES EL COMPONENTE QUE QUERÉS RENDERIZAR
+        errorElement: <ErrorPage />,
+      },
+    ],
+  },
+  {
+    path: "/login",
+    element: <LoginForm />,
+  },
+]);
+
+
 
   return <RouterProvider router={router} />;
 };
