@@ -4,7 +4,7 @@ import { Link, useLocation } from "react-router-dom";
 
 const navigation = [
   { name: "Dashboard", href: "/", icon: LayoutDashboard },
-  { name: "Canchas", href: "/canchas", icon: MapPin },
+  { name: "Canchas", href: "/filds", icon: MapPin },
   { name: "Reservas", href: "/reservas", icon: Calendar },
 ];
 

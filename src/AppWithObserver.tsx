@@ -20,11 +20,11 @@ const router = createBrowserRouter([
          Component: App,
          errorElement: <ErrorPage />,
        },
-    //   {
-    //     path: "afiliados",
-    //     Component: Afiliados,
-    //     errorElement: <ErrorPage />,
-    //   },
+       {
+        path: "filds",         
+        Component: FieldsPage, 
+        errorElement: <ErrorPage />,
+        },
     //   {
     //     path: "eventos",
     //     Component: Eventos,
@@ -67,30 +67,5 @@ export const AppWithObserver = () => {
 //       </div>
 //     );
 //   }
-const router = createBrowserRouter([
-  {
-    path: "/",
-    element: <Layout />,
-    children: [
-      {
-        index: true,
-        Component: App,
-        errorElement: <ErrorPage />,
-      },
-      {
-        path: "filds",          // 👈 ESTA ES LA RUTA QUE QUERÉS
-        Component: FieldsPage, // 👈 ESTE ES EL COMPONENTE QUE QUERÉS RENDERIZAR
-        errorElement: <ErrorPage />,
-      },
-    ],
-  },
-  {
-    path: "/login",
-    element: <LoginForm />,
-  },
-]);
-
-
-
   return <RouterProvider router={router} />;
 };
