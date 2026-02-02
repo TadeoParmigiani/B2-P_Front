@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { FieldModal } from './FieldModal';
 
 interface Field {
   id: string;
@@ -10,12 +11,10 @@ interface Field {
 }
 
 export const FieldsPage = () => {
-  // Estado para la lista de canchas
   const [fields, setFields] = useState<Field[]>([]);
-  // Estado para la cancha seleccionada
-  const [selectedFieldId, setSelectedFieldId] = useState<string | null>(null);
+  const [selectedField, setSelectedField] = useState<Field | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // Simulación de carga de datos (reemplazar con llamada a API real)
   useEffect(() => {
     const mockFields: Field[] = [
       { id: '1', name: 'Cancha 1', type: 'CANCHA 5', pricePerHour: 100, isActive: true },
@@ -25,33 +24,96 @@ export const FieldsPage = () => {
     setFields(mockFields);
   }, []);
 
- // Función para seleccionar/deseleccionar cancha
-  const toggleSelectField = (id: string) => {
-    if (selectedFieldId === id) {
-      setSelectedFieldId(null);
-    } else {
-      setSelectedFieldId(id);
-    }
+  const openCreateModal = () => {
+    setSelectedField(null);
+    setIsModalOpen(true);
+  };
+
+  const openEditModal = (field: Field) => {
+    setSelectedField(field);
+    setIsModalOpen(true);
+  };
+
+  const deleteField = (id: string) => {
+    setFields(prev => prev.filter(f => f.id !== id));
+  };
+
+  const toggleActive = (id: string) => {
+    setFields(prev =>
+      prev.map(f =>
+        f.id === id ? { ...f, isActive: !f.isActive } : f
+      )
+    );
   };
 
   return (
-    <div className="p-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div className="relative p-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+
       {fields.map(field => (
-        <Card
-          key={field.id}
-          className={`cursor-pointer border-2 ${selectedFieldId === field.id ? 'border-green-500' : 'border-transparent'}`}
-          onClick={() => toggleSelectField(field.id)}
-        >
+        <Card key={field.id} className="border shadow-sm">
           <CardHeader>
             <CardTitle>{field.name}</CardTitle>
           </CardHeader>
+
           <CardContent>
             <p>Tipo: {field.type}</p>
             <p>Precio por hora: ${field.pricePerHour}</p>
             <p>Estado: {field.isActive ? 'Activa' : 'Inactiva'}</p>
+
+            <div className="flex gap-2 mt-4">
+              <button
+                className="px-3 py-1 bg-blue-500 text-white rounded"
+                onClick={() => openEditModal(field)}
+              >
+                Editar
+              </button>
+
+              <button
+                className="px-3 py-1 bg-red-500 text-white rounded"
+                onClick={() => deleteField(field.id)}
+              >
+                Eliminar
+              </button>
+
+              <button
+                className="px-3 py-1 bg-gray-600 text-white rounded"
+                onClick={() => toggleActive(field.id)}
+              >
+                {field.isActive ? 'Desactivar' : 'Activar'}
+              </button>
+            </div>
           </CardContent>
         </Card>
       ))}
+
+      {/* Botón flotante */}
+      <button
+        onClick={openCreateModal}
+        className="fixed bottom-6 right-6 bg-green-600 text-white rounded-full w-14 h-14 shadow-lg text-3xl"
+      >
+        +
+      </button>
+
+      {/* Modal */}
+      {isModalOpen && (
+        <FieldModal
+          field={selectedField}
+          onClose={() => setIsModalOpen(false)}
+          onSave={(newField) => {
+            if (selectedField) {
+              setFields(prev =>
+                prev.map(f => (f.id === newField.id ? newField : f))
+              );
+            } else {
+              setFields(prev => [
+                ...prev,
+                { ...newField, id: crypto.randomUUID() }
+              ]);
+            }
+            setIsModalOpen(false);
+          }}
+        />
+      )}
     </div>
   );
 };
