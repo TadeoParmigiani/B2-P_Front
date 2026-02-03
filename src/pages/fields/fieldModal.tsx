@@ -1,21 +1,14 @@
 import { useState, useEffect } from "react";
-
-interface Field {
-  id?: string;
-  name: string;
-  type: string;
-  pricePerHour: number;
-  isActive: boolean;
-}
+import type { FieldForm } from "@/types/fields";
 
 interface FieldModalProps {
-  field: Field | null;
+  field: FieldForm | null;
   onClose: () => void;
-  onSave: (field: Field) => void;
+  onSave: (field: FieldForm) => void;
 }
 
 export const FieldModal = ({ field, onClose, onSave }: FieldModalProps) => {
-  const [formData, setFormData] = useState<Field>({
+  const [formData, setFormData] = useState<FieldForm>({
     name: "",
     type: "",
     pricePerHour: 0,
@@ -28,10 +21,12 @@ export const FieldModal = ({ field, onClose, onSave }: FieldModalProps) => {
     }
   }, [field]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
 
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       [name]: name === "pricePerHour" ? Number(value) : value,
     }));
@@ -39,19 +34,16 @@ export const FieldModal = ({ field, onClose, onSave }: FieldModalProps) => {
 
   const handleSubmit = () => {
     if (!formData.name || !formData.type) return;
-
     onSave(formData);
   };
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
       <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
-
         <h2 className="text-xl font-bold mb-4">
           {field ? "Editar cancha" : "Crear nueva cancha"}
         </h2>
 
-        {/* Nombre */}
         <label className="block mb-2 font-medium">Nombre</label>
         <input
           type="text"
@@ -61,7 +53,6 @@ export const FieldModal = ({ field, onClose, onSave }: FieldModalProps) => {
           className="w-full border p-2 rounded mb-4"
         />
 
-        {/* Tipo */}
         <label className="block mb-2 font-medium">Tipo</label>
         <select
           name="type"
@@ -76,7 +67,6 @@ export const FieldModal = ({ field, onClose, onSave }: FieldModalProps) => {
           <option value="PADEL">Pádel</option>
         </select>
 
-        {/* Precio */}
         <label className="block mb-2 font-medium">Precio por hora</label>
         <input
           type="number"
@@ -86,13 +76,12 @@ export const FieldModal = ({ field, onClose, onSave }: FieldModalProps) => {
           className="w-full border p-2 rounded mb-4"
         />
 
-        {/* Estado */}
         <label className="block mb-2 font-medium">Estado</label>
         <select
           name="isActive"
           value={formData.isActive ? "true" : "false"}
           onChange={(e) =>
-            setFormData(prev => ({
+            setFormData((prev) => ({
               ...prev,
               isActive: e.target.value === "true",
             }))
@@ -103,7 +92,6 @@ export const FieldModal = ({ field, onClose, onSave }: FieldModalProps) => {
           <option value="false">Inactiva</option>
         </select>
 
-        {/* Botones */}
         <div className="flex justify-end gap-3 mt-4">
           <button
             onClick={onClose}
