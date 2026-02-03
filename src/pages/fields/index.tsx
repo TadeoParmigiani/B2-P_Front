@@ -1,9 +1,7 @@
-import type React from "react"
+
 import { useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
 import {
   Dialog,
@@ -13,9 +11,9 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Plus, Pencil, MapPin} from "lucide-react"
-import type { Field, FieldForm } from "@/types/types"
+import { Plus, Pencil, MapPin } from "lucide-react"
+import type { Field, FieldForm as FieldFormType } from "@/types/types"
+import { FieldForm } from "@/components/forms/FieldForm"
 
 const fieldsIniciales: Field[] = [
   { id: "1", name: "Cancha Principal", type: "CANCHA 11", pricePerHour: 150, isActive: true },
@@ -29,48 +27,39 @@ export function FieldsPage() {
   const [fields, setFields] = useState<Field[]>(fieldsIniciales)
   const [dialogOpen, setDialogOpen] = useState(false)
   const [editingField, setEditingField] = useState<Field | null>(null)
-  const [formData, setFormData] = useState<FieldForm>({
-    name: "",
-    type: "",
-    pricePerHour: 0,
-    isActive: true,
-  })
 
   const handleOpenDialog = (field?: Field) => {
     if (field) {
       setEditingField(field)
-      setFormData({
-        id: field.id,
-        name: field.name,
-        type: field.type,
-        pricePerHour: field.pricePerHour,
-        isActive: field.isActive,
-      })
     } else {
       setEditingField(null)
-      setFormData({ name: "", type: "", pricePerHour: 0, isActive: true })
     }
     setDialogOpen(true)
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
+  const handleFormSubmit = (data: FieldFormType) => {
     if (editingField) {
       setFields(
         fields.map((f) =>
           f.id === editingField.id
-            ? { ...f, ...formData, id: editingField.id }
+            ? { ...f, ...data, id: editingField.id }
             : f
         )
       )
     } else {
       const newField: Field = {
         id: (Math.max(...fields.map((f) => Number(f.id))) + 1).toString(),
-        ...formData,
+        ...data,
       }
       setFields([...fields, newField])
     }
     setDialogOpen(false)
+    setEditingField(null)
+  }
+
+  const handleCancel = () => {
+    setDialogOpen(false)
+    setEditingField(null)
   }
 
   const getEstadoBadge = (isActive: boolean) => {
@@ -112,76 +101,11 @@ export function FieldsPage() {
                 {editingField ? "Modifica los datos de la cancha" : "Ingresa los datos de la nueva cancha"}
               </DialogDescription>
             </DialogHeader>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="name" className="text-zinc-100">
-                  Nombre
-                </Label>
-                <Input
-                  id="name"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="bg-zinc-800 border-zinc-700"
-                  required
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="type" className="text-zinc-100">
-                    Tipo
-                  </Label>
-                  <Select value={formData.type} onValueChange={(value) => setFormData({ ...formData, type: value })}>
-                    <SelectTrigger className="bg-zinc-800 border-zinc-700">
-                      <SelectValue placeholder="Seleccionar" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="CANCHA 5">Cancha 5</SelectItem>
-                      <SelectItem value="CANCHA 7">Cancha 7</SelectItem>
-                      <SelectItem value="CANCHA 11">Cancha 11</SelectItem>
-                      <SelectItem value="PADEL">Pádel</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="pricePerHour" className="text-zinc-100">
-                    Precio/hora ($)
-                  </Label>
-                  <Input
-                    id="pricePerHour"
-                    type="number"
-                    value={formData.pricePerHour}
-                    onChange={(e) => setFormData({ ...formData, pricePerHour: Number(e.target.value) })}
-                    className="bg-zinc-800 border-zinc-700"
-                    required
-                  />
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="isActive" className="text-zinc-100">
-                  Estado
-                </Label>
-                <Select
-                  value={formData.isActive ? "true" : "false"}
-                  onValueChange={(value) => setFormData({ ...formData, isActive: value === "true" })}
-                >
-                  <SelectTrigger className="bg-zinc-800 border-zinc-700">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="true">Activa</SelectItem>
-                    <SelectItem value="false">Inactiva</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="flex justify-end gap-2 pt-4">
-                <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
-                  Cancelar
-                </Button>
-                <Button type="submit" className="bg-green-500 text-zinc-950 hover:bg-green-600">
-                  {editingField ? "Guardar cambios" : "Crear cancha"}
-                </Button>
-              </div>
-            </form>
+            <FieldForm
+              editingField={editingField}
+              onSubmit={handleFormSubmit}
+              onCancel={handleCancel}
+            />
           </DialogContent>
         </Dialog>
       </div>
