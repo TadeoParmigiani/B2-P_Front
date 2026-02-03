@@ -4,6 +4,7 @@ import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import type { Field, FieldForm as FieldFormType } from "@/types/types"
+import { createFieldValidationSchema, updateFieldValidationSchema } from "@/components/validations/fields"
 
 interface FieldFormProps {
   editingField: Field | null
@@ -12,6 +13,8 @@ interface FieldFormProps {
 }
 
 export function FieldForm({ editingField, onSubmit, onCancel }: FieldFormProps) {
+  const validationSchema = editingField ? updateFieldValidationSchema : createFieldValidationSchema
+
   const {
     register,
     handleSubmit,
@@ -33,6 +36,30 @@ export function FieldForm({ editingField, onSubmit, onCancel }: FieldFormProps) 
           pricePerHour: 0,
           isActive: true,
         },
+    resolver: async (data) => {
+      const { error } = validationSchema.validate(data, {
+        abortEarly: false,
+        stripUnknown: true
+      })
+
+      if (!error) {
+        return { values: data, errors: {} }
+      }
+
+      const formErrors: Record<string, { message: string }> = {}
+      
+      error.details.forEach((detail) => {
+        const path = detail.path.join('.')
+        formErrors[path] = {
+          message: detail.message
+        }
+      })
+
+      return {
+        values: {},
+        errors: formErrors,
+      }
+    },
   })
 
   const watchType = watch("type")
@@ -50,7 +77,7 @@ export function FieldForm({ editingField, onSubmit, onCancel }: FieldFormProps) 
         </Label>
         <Input
           id="name"
-          {...register("name", { required: "El nombre es requerido" })}
+          {...register("name")}
           className="bg-zinc-800 border-zinc-700"
         />
         {errors.name && (
@@ -74,7 +101,6 @@ export function FieldForm({ editingField, onSubmit, onCancel }: FieldFormProps) 
               <SelectItem value="CANCHA 5">Cancha 5</SelectItem>
               <SelectItem value="CANCHA 7">Cancha 7</SelectItem>
               <SelectItem value="CANCHA 11">Cancha 11</SelectItem>
-              <SelectItem value="PADEL">Pádel</SelectItem>
             </SelectContent>
           </Select>
           {errors.type && (
@@ -89,11 +115,8 @@ export function FieldForm({ editingField, onSubmit, onCancel }: FieldFormProps) 
           <Input
             id="pricePerHour"
             type="number"
-            {...register("pricePerHour", {
-              required: "El precio es requerido",
-              min: { value: 1, message: "El precio debe ser mayor a 0" },
-              valueAsNumber: true,
-            })}
+            step="0.01"
+            {...register("pricePerHour", { valueAsNumber: true })}
             className="bg-zinc-800 border-zinc-700"
           />
           {errors.pricePerHour && (
@@ -118,6 +141,9 @@ export function FieldForm({ editingField, onSubmit, onCancel }: FieldFormProps) 
             <SelectItem value="false">Inactiva</SelectItem>
           </SelectContent>
         </Select>
+        {errors.isActive && (
+          <p className="text-red-500 text-sm">{errors.isActive.message}</p>
+        )}
       </div>
 
       <div className="flex justify-end gap-2 pt-4">
