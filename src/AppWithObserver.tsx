@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { createBrowserRouter, RouterProvider } from "react-router";
 import { observeUser, getAuthState } from "./features/authSlice";
 import type { AppDispatch } from "./store/store";
+import PrivateRoute from "./components/privateRoute/PrivateRouter";
 import App from "./App";
 import { LoginForm } from "./pages/login/login";
 import ErrorPage from "./components/ErrorPage";
@@ -15,7 +16,9 @@ const router = createBrowserRouter([
   {
     path: "/",
     element: (
+      <PrivateRoute>
         <Layout />
+      </PrivateRoute>
     ),
      children: [
        {

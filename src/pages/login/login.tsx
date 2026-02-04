@@ -1,27 +1,70 @@
-import React, { useState } from "react"
+import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
+import { useDispatch, useSelector } from "react-redux"
+import { useForm } from "react-hook-form"
+import type { AppDispatch, RootState } from "@/store/store"
+import { loginUser, clearError } from "@/features/authSlice"
+import { loginSchema } from "@/components/validations/login"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Eye, EyeOff, Loader2 } from "lucide-react"
 
+interface LoginFormData {
+  email: string
+  password: string
+}
+
 export function LoginForm() {
   const [showPassword, setShowPassword] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
+  
+  const dispatch = useDispatch<AppDispatch>()
   const navigate = useNavigate()
+  
+  const { user, loading, error } = useSelector((state: RootState) => state.auth)
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    setError,
+  } = useForm<LoginFormData>({
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  })
 
-    // Simular autenticación
-    await new Promise((resolve) => setTimeout(resolve, 1500))
+  const onSubmit = (data: LoginFormData) => {
+    // Validar con Joi
+    const { error: joiError } = loginSchema.validate(data, { abortEarly: false })
 
-    navigate("/")
+    if (joiError) {
+      joiError.details.forEach((detail) => {
+        const field = detail.path[0] as keyof LoginFormData
+        setError(field, {
+          type: "manual",
+          message: detail.message,
+        })
+      })
+      return
+    }
+
+    dispatch(loginUser(data))
   }
+
+  useEffect(() => {
+    if (user) {
+      navigate("/")
+    }
+  }, [user, navigate])
+
+  useEffect(() => {
+    return () => {
+      dispatch(clearError())
+    }
+  }, [dispatch])
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-zinc-950 p-4">
@@ -36,7 +79,7 @@ export function LoginForm() {
           </div>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email" className="text-zinc-100">
                 Correo electrónico
@@ -45,11 +88,14 @@ export function LoginForm() {
                 id="email"
                 type="email"
                 placeholder="admin@b2p.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                className="bg-zinc-800 border-zinc-700 focus:border-green-500 focus:ring-green-500"
+                {...register("email")}
+                className={`bg-zinc-800 border-zinc-700 focus:border-green-500 focus:ring-green-500 ${
+                  errors.email ? "border-red-500 focus:border-red-500 focus:ring-red-500" : ""
+                }`}
               />
+              {errors.email && (
+                <p className="text-sm text-red-400">{errors.email.message}</p>
+              )}
             </div>
             <div className="space-y-2">
               <Label htmlFor="password" className="text-zinc-100">
@@ -60,10 +106,10 @@ export function LoginForm() {
                   id="password"
                   type={showPassword ? "text" : "password"}
                   placeholder="••••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  className="bg-zinc-800 border-zinc-700 focus:border-green-500 focus:ring-green-500 pr-10"
+                  {...register("password")}
+                  className={`bg-zinc-800 border-zinc-700 focus:border-green-500 focus:ring-green-500 pr-10 ${
+                    errors.password ? "border-red-500 focus:border-red-500 focus:ring-red-500" : ""
+                  }`}
                 />
                 <button
                   type="button"
@@ -73,13 +119,23 @@ export function LoginForm() {
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
+              {errors.password && (
+                <p className="text-sm text-red-400">{errors.password.message}</p>
+              )}
             </div>
+
+            {error && (
+              <div className="p-3 rounded-md bg-red-500/10 border border-red-500/20">
+                <p className="text-sm text-red-400">{error}</p>
+              </div>
+            )}
+
             <Button
               type="submit"
               className="w-full bg-green-500 text-zinc-950 hover:bg-green-600 font-semibold"
-              disabled={isLoading}
+              disabled={loading}
             >
-              {isLoading ? (
+              {loading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Iniciando sesión...
