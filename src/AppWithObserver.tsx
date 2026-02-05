@@ -8,6 +8,7 @@ import App from "./App";
 import { LoginForm } from "./pages/login/login";
 import ErrorPage from "./components/ErrorPage";
 import {FieldsPage}from "./pages/fields/index";
+import { BookingsPage } from "./pages/Bookings";
 
 import Layout from "./Layout";
 
@@ -31,6 +32,11 @@ const router = createBrowserRouter([
         Component: FieldsPage, 
         errorElement: <ErrorPage />,
         },
+       {
+        path: "reservas",
+        Component: BookingsPage,
+        errorElement: <ErrorPage />,
+       },
     //   {
     //     path: "eventos",
     //     Component: Eventos,
