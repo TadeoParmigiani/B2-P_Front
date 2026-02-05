@@ -196,8 +196,9 @@ export function BookingsPage() {
               key={booking.id}
               className="bg-black border border-white/10 shadow-lg transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl"
             >
-              <CardContent className="p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                <div className="flex items-center gap-4 min-w-0">
+              <CardContent className="p-5 sm:p-6">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                  <div className="flex items-center gap-4 min-w-0 pr-2 sm:pr-4">
                   <div className="w-11 h-11 rounded-full bg-green-900/40 border border-green-500/30 shadow-[0_0_20px_rgba(34,197,94,0.2)] flex items-center justify-center shrink-0">
                     <Clock3 className="h-5 w-5 text-green-500" />
                   </div>
@@ -214,16 +215,17 @@ export function BookingsPage() {
                       {booking.field} - {booking.client}
                     </p>
                   </div>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 px-4 self-start sm:self-center border border-white/10 text-zinc-200 hover:bg-zinc-800 rounded-md"
+                    onClick={() => openEditDialog(booking)}
+                  >
+                    <Pencil className="h-3.5 w-3.5 mr-1.5" />
+                    Editar
+                  </Button>
                 </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-8 px-3 self-start sm:self-center border border-white/10 text-zinc-200 hover:bg-zinc-800 rounded-md"
-                  onClick={() => openEditDialog(booking)}
-                >
-                  <Pencil className="h-3.5 w-3.5 mr-1.5" />
-                  Editar
-                </Button>
               </CardContent>
             </Card>
           ))}
