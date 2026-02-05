@@ -154,17 +154,17 @@ export function BookingsPage() {
           <h1 className="text-3xl lg:text-4xl font-extrabold tracking-tight text-white">Gestión de Reservas</h1>
           <p className="text-zinc-400 mt-2">Visualiza y gestiona las reservas</p>
         </div>
-        <Card className="max-w-2xl mx-auto bg-gradient-to-r from-zinc-900 to-zinc-800 border border-white/10 rounded-2xl shadow-xl">
-          <CardContent className="py-3 px-3 sm:px-4 flex items-center justify-between gap-2">
+        <Card className="max-w-2xl mx-auto bg-gradient-to-r from-zinc-900 to-zinc-800 border border-zinc-800/80 rounded-2xl shadow-xl">
+          <div className="min-h-16 px-3 sm:px-4 py-3 flex items-center justify-between gap-2">
             <Button
               variant="ghost"
               size="icon"
               onClick={() => setDayOffset((prev) => prev - 1)}
-              className="text-zinc-200 h-9 w-9 rounded-xl hover:bg-white/10 bg-white/5"
+              className="text-zinc-200 h-10 w-10 rounded-xl hover:bg-white/10 bg-white/5 flex items-center justify-center"
             >
               <ChevronLeft className="h-5 w-5" />
             </Button>
-            <div className="flex items-center gap-2 text-zinc-100 font-medium bg-zinc-900/60 border border-white/10 rounded-xl px-3 py-2">
+            <div className="h-10 flex items-center gap-2 text-zinc-100 font-medium px-2">
               <Calendar className="h-4 w-4 text-green-500 shrink-0" />
               <span>{selectedDateLabel}</span>
             </div>
@@ -172,11 +172,11 @@ export function BookingsPage() {
               variant="ghost"
               size="icon"
               onClick={() => setDayOffset((prev) => prev + 1)}
-              className="text-zinc-200 h-9 w-9 rounded-xl hover:bg-white/10 bg-white/5"
+              className="text-zinc-200 h-10 w-10 rounded-xl hover:bg-white/10 bg-white/5 flex items-center justify-center"
             >
               <ChevronRight className="h-5 w-5" />
             </Button>
-          </CardContent>
+          </div>
         </Card>
       </div>
 
