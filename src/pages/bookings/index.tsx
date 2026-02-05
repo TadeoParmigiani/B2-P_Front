@@ -38,6 +38,12 @@ interface BookingForm {
 const fields = ["CPrincipal", "C2", "C3", "C5", "C6", "C8"]
 const hours = Array.from({ length: 13 }, (_, i) => `${(8 + i).toString().padStart(2, "0")}:00`)
 
+function getNextHourLabel(hour: string) {
+  const hourValue = Number.parseInt(hour.split(":")[0], 10)
+  const nextHour = Number.isNaN(hourValue) ? hour : `${(hourValue + 1).toString().padStart(2, "0")}:00`
+  return nextHour
+}
+
 const today = new Date()
 
 const initialBookings: Booking[] = [
@@ -154,7 +160,7 @@ export function BookingsPage() {
           <h1 className="text-3xl lg:text-4xl font-extrabold tracking-tight text-white">Gestión de Reservas</h1>
           <p className="text-zinc-400 mt-2">Visualiza y gestiona las reservas</p>
         </div>
-        <Card className="max-w-2xl mx-auto bg-gradient-to-r from-zinc-900 to-zinc-800 border border-zinc-800/80 rounded-2xl shadow-xl">
+        <Card className="max-w-2xl mx-auto bg-black border border-zinc-800/80 rounded-2xl shadow-xl">
           <div className="min-h-16 px-3 sm:px-4 py-3 flex items-center justify-between gap-2">
             <Button
               variant="ghost"
@@ -188,7 +194,7 @@ export function BookingsPage() {
           {bookingsOfDay.map((booking) => (
             <Card
               key={booking.id}
-              className="bg-gradient-to-br from-zinc-900 to-zinc-800 border border-white/10 shadow-lg transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl"
+              className="bg-black border border-white/10 shadow-lg transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl"
             >
               <CardContent className="p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div className="flex items-center gap-4 min-w-0">
@@ -222,7 +228,7 @@ export function BookingsPage() {
             </Card>
           ))}
           {!bookingsOfDay.length && (
-            <Card className="bg-gradient-to-br from-zinc-900 to-zinc-800 border border-white/10 shadow-lg">
+            <Card className="bg-black border border-white/10 shadow-lg">
               <CardContent className="p-6 text-center text-zinc-400">
                 No hay reservas cargadas para esta fecha.
               </CardContent>
@@ -239,15 +245,23 @@ export function BookingsPage() {
         <Card className="bg-zinc-900 border-zinc-800 overflow-x-auto">
           <CardContent className="p-0 min-w-[780px]">
             <div className="grid grid-cols-[90px_repeat(6,minmax(0,1fr))]">
-              <div className="p-3 border-b border-r border-zinc-800 text-xs text-zinc-500 uppercase">Hora</div>
+              <div className="h-12 px-1 flex items-center justify-center border-b border-r border-zinc-800 text-xs text-zinc-500 uppercase text-center">
+                Hora
+              </div>
               {fields.map((field) => (
-                <div key={field} className="p-3 border-b border-zinc-800 text-xs text-zinc-400 font-semibold">
+                <div
+                  key={field}
+                  className="h-12 px-1 flex items-center justify-center border-b border-zinc-800 text-xs text-zinc-400 font-semibold text-center"
+                >
                   {field}
                 </div>
               ))}
               {hours.map((hour) => (
                 <div key={hour} className="contents">
-                  <div className="p-3 border-r border-b border-zinc-800 text-sm font-medium text-zinc-300">{hour}</div>
+                  <div className="h-12 px-1 flex flex-col items-center justify-center border-r border-b border-zinc-800 text-sm font-medium text-zinc-300 text-center leading-tight">
+                    <div className="leading-none">{hour}</div>
+                    <div className="text-xs text-zinc-500 leading-none">{getNextHourLabel(hour)}</div>
+                  </div>
                   {fields.map((field) => {
                     const booking = bookingIndex.get(`${field}-${hour}`)
                     const isOccupied = Boolean(booking)
