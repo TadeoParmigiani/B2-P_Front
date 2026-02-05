@@ -2,7 +2,7 @@ import { useMemo, useState } from "react"
 import { Calendar, ChevronLeft, ChevronRight, Clock3, Pencil } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import {
   Dialog,
   DialogContent,
@@ -65,12 +65,12 @@ function toCapitalizedDateLabel(date: Date) {
 
 function getStatusBadgeClasses(status: BookingStatus) {
   if (status === "Confirmada") {
-    return "bg-green-500/10 text-green-500 border-green-500/20"
+    return "bg-green-500/15 text-green-400 border-green-500/30 rounded-full"
   }
   if (status === "Pendiente") {
-    return "bg-amber-500/10 text-amber-400 border-amber-500/20"
+    return "bg-amber-500/15 text-amber-300 border-amber-500/30 rounded-full"
   }
-  return "bg-red-500/10 text-red-500 border-red-500/20"
+  return "bg-red-500/15 text-red-300 border-red-500/30 rounded-full"
 }
 
 function getClientShortName(client: string) {
@@ -149,22 +149,22 @@ export function BookingsPage() {
 
   return (
     <div className="p-6 lg:p-8 space-y-6">
-      <div className="pt-12 lg:pt-0 space-y-4">
+      <div className="pt-12 lg:pt-0 mb-8 space-y-5">
         <div>
-          <h1 className="text-2xl lg:text-3xl font-bold text-white">Gestion de Reservas</h1>
-          <p className="text-zinc-400 mt-1">Visualiza y gestiona las reservas</p>
+          <h1 className="text-3xl lg:text-4xl font-extrabold tracking-tight text-white">Gestión de Reservas</h1>
+          <p className="text-zinc-400 mt-2">Visualiza y gestiona las reservas</p>
         </div>
-        <Card className="bg-zinc-900 border-zinc-800 max-w-2xl mx-auto">
+        <Card className="max-w-2xl mx-auto bg-gradient-to-r from-zinc-900 to-zinc-800 border border-white/10 rounded-2xl shadow-xl">
           <CardContent className="py-3 px-3 sm:px-4 flex items-center justify-between gap-2">
             <Button
               variant="ghost"
               size="icon"
               onClick={() => setDayOffset((prev) => prev - 1)}
-              className="text-zinc-300 hover:bg-zinc-800 h-9 w-9"
+              className="text-zinc-200 h-9 w-9 rounded-xl hover:bg-white/10 bg-white/5"
             >
               <ChevronLeft className="h-5 w-5" />
             </Button>
-            <div className="flex items-center gap-2 text-zinc-100 font-medium bg-zinc-800/60 border border-zinc-700 rounded-md px-3 py-2">
+            <div className="flex items-center gap-2 text-zinc-100 font-medium bg-zinc-900/60 border border-white/10 rounded-xl px-3 py-2">
               <Calendar className="h-4 w-4 text-green-500 shrink-0" />
               <span>{selectedDateLabel}</span>
             </div>
@@ -172,7 +172,7 @@ export function BookingsPage() {
               variant="ghost"
               size="icon"
               onClick={() => setDayOffset((prev) => prev + 1)}
-              className="text-zinc-300 hover:bg-zinc-800 h-9 w-9"
+              className="text-zinc-200 h-9 w-9 rounded-xl hover:bg-white/10 bg-white/5"
             >
               <ChevronRight className="h-5 w-5" />
             </Button>
@@ -180,14 +180,19 @@ export function BookingsPage() {
         </Card>
       </div>
 
-      <section className="space-y-4">
-        <h2 className="text-xl font-bold text-white">Reservas del dia ({bookingsOfDay.length})</h2>
-        <div className="space-y-3">
+      <section className="space-y-5">
+        <h2 className="text-2xl font-extrabold text-white">
+          Reservas del día <span className="text-zinc-300">({bookingsOfDay.length})</span>
+        </h2>
+        <div className="space-y-4">
           {bookingsOfDay.map((booking) => (
-            <Card key={booking.id} className="bg-zinc-900 border-zinc-800">
-              <CardContent className="p-4 grid grid-cols-[1fr_auto] items-center gap-4">
+            <Card
+              key={booking.id}
+              className="bg-gradient-to-br from-zinc-900 to-zinc-800 border border-white/10 shadow-lg transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl"
+            >
+              <CardContent className="p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div className="flex items-center gap-4 min-w-0">
-                  <div className="w-10 h-10 rounded-full bg-green-500/10 border border-green-500/20 flex items-center justify-center">
+                  <div className="w-11 h-11 rounded-full bg-green-900/40 border border-green-500/30 shadow-[0_0_20px_rgba(34,197,94,0.2)] flex items-center justify-center shrink-0">
                     <Clock3 className="h-5 w-5 text-green-500" />
                   </div>
                   <div className="min-w-0">
@@ -205,9 +210,9 @@ export function BookingsPage() {
                   </div>
                 </div>
                 <Button
-                  variant="outline"
+                  variant="ghost"
                   size="sm"
-                  className="border-zinc-700 text-zinc-200 hover:bg-zinc-800 h-8 px-3 self-center"
+                  className="h-8 px-3 self-start sm:self-center border border-white/10 text-zinc-200 hover:bg-zinc-800 rounded-md"
                   onClick={() => openEditDialog(booking)}
                 >
                   <Pencil className="h-3.5 w-3.5 mr-1.5" />
@@ -217,7 +222,7 @@ export function BookingsPage() {
             </Card>
           ))}
           {!bookingsOfDay.length && (
-            <Card className="bg-zinc-900 border-zinc-800">
+            <Card className="bg-gradient-to-br from-zinc-900 to-zinc-800 border border-white/10 shadow-lg">
               <CardContent className="p-6 text-center text-zinc-400">
                 No hay reservas cargadas para esta fecha.
               </CardContent>
