@@ -2,7 +2,7 @@ import { useMemo, useState } from "react"
 import { Calendar, ChevronLeft, ChevronRight, Clock3, Pencil } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import {
   Dialog,
   DialogContent,
@@ -156,12 +156,16 @@ export function BookingsPage() {
   return (
     <div className="p-6 lg:p-8 space-y-6">
       <div className="pt-12 lg:pt-0 mb-8 space-y-5">
-        <div>
-          <h1 className="text-3xl lg:text-4xl font-extrabold tracking-tight text-white">Gestión de Reservas</h1>
-          <p className="text-zinc-400 mt-2">Visualiza y gestiona las reservas</p>
-        </div>
+        <CardHeader className="p-0 space-y-2">
+          <CardTitle className="text-3xl lg:text-4xl font-extrabold tracking-tight">
+            Gestión de Reservas
+          </CardTitle>
+          <CardDescription className="text-zinc-400">
+            Visualiza y gestiona las reservas
+          </CardDescription>
+        </CardHeader>
         <Card className="max-w-2xl mx-auto bg-black border border-zinc-800/80 rounded-2xl shadow-xl">
-          <div className="min-h-16 px-3 sm:px-4 py-3 flex items-center justify-between gap-2">
+          <CardContent className="min-h-16 p-0 px-3 sm:px-4 pt-4 pb-4 flex items-center justify-between gap-2">
             <Button
               variant="ghost"
               size="icon"
@@ -182,14 +186,16 @@ export function BookingsPage() {
             >
               <ChevronRight className="h-5 w-5" />
             </Button>
-          </div>
+          </CardContent>
         </Card>
       </div>
 
       <section className="space-y-5">
-        <h2 className="text-2xl font-extrabold text-white">
-          Reservas del día <span className="text-zinc-300">({bookingsOfDay.length})</span>
-        </h2>
+        <CardHeader className="p-0">
+          <CardTitle className="text-2xl font-extrabold">
+            Reservas del día <span className="text-zinc-300">({bookingsOfDay.length})</span>
+          </CardTitle>
+        </CardHeader>
         <div className="space-y-4">
           {bookingsOfDay.map((booking) => (
             <Card
@@ -197,7 +203,7 @@ export function BookingsPage() {
               className="bg-black border border-white/10 shadow-lg transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl"
             >
               <CardContent className="p-5 sm:p-6">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 min-h-12">
                   <div className="flex items-center gap-4 min-w-0 pr-2 sm:pr-4">
                   <div className="w-11 h-11 rounded-full bg-green-900/40 border border-green-500/30 shadow-[0_0_20px_rgba(34,197,94,0.2)] flex items-center justify-center shrink-0">
                     <Clock3 className="h-5 w-5 text-green-500" />
@@ -216,15 +222,17 @@ export function BookingsPage() {
                     </p>
                   </div>
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-8 px-4 self-start sm:self-center border border-white/10 text-zinc-200 hover:bg-zinc-800 rounded-md"
-                    onClick={() => openEditDialog(booking)}
-                  >
-                    <Pencil className="h-3.5 w-3.5 mr-1.5" />
-                    Editar
-                  </Button>
+                  <CardFooter className="!p-0 !pt-0 self-stretch flex items-center justify-center">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-8 px-4 border border-white/10 text-zinc-200 hover:bg-zinc-800 rounded-md"
+                      onClick={() => openEditDialog(booking)}
+                    >
+                      <Pencil className="h-4 w-4 mr-2" />
+                      Editar
+                    </Button>
+                  </CardFooter>
                 </div>
               </CardContent>
             </Card>
@@ -240,10 +248,12 @@ export function BookingsPage() {
       </section>
 
       <section className="space-y-4">
-        <div>
-          <h2 className="text-xl font-bold text-white">Vista de Horarios</h2>
-          <p className="text-zinc-400 text-sm">Disponibilidad por cancha</p>
-        </div>
+        <CardHeader className="p-0 space-y-1">
+          <CardTitle className="text-xl font-bold">Vista de Horarios</CardTitle>
+          <CardDescription className="text-zinc-400 text-sm">
+            Disponibilidad por cancha
+          </CardDescription>
+        </CardHeader>
         <Card className="bg-zinc-900 border-zinc-800 overflow-x-auto">
           <CardContent className="p-0 min-w-[780px]">
             <div className="grid grid-cols-[90px_repeat(6,minmax(0,1fr))]">
@@ -427,3 +437,9 @@ export function BookingsPage() {
     </div>
   )
 }
+
+
+
+
+
+
