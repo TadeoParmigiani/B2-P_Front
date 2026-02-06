@@ -16,3 +16,15 @@ export interface Field extends FieldBase {
 export interface FieldForm extends FieldBase {
   id?: string;
 }
+
+export type BookingStatus = "Confirmada" | "Pendiente" | "Cancelada";
+
+export interface Booking {
+  id?: string;
+  date: string;
+  field: string;
+  client: string;
+  startTime: string;
+  endTime: string;
+  status: BookingStatus;
+}

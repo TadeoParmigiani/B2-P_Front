@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react"
+import { useForm } from "react-hook-form"
 import { Calendar, ChevronLeft, ChevronRight, Clock3, Pencil } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -13,27 +14,8 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-
-type BookingStatus = "Confirmada" | "Pendiente" | "Cancelada"
-
-interface Booking {
-  id: string
-  date: string
-  field: string
-  client: string
-  startTime: string
-  endTime: string
-  status: BookingStatus
-}
-
-interface BookingForm {
-  field: string
-  client: string
-  date: string
-  startTime: string
-  endTime: string
-  status: BookingStatus
-}
+import type { Booking, BookingStatus } from "@/types/types"
+import { bookingValidationSchema } from "@/components/validations/bookings"
 
 const fields = ["CPrincipal", "C2", "C3", "C5", "C6", "C8"]
 const hours = Array.from({ length: 13 }, (_, i) => `${(8 + i).toString().padStart(2, "0")}:00`)
@@ -91,7 +73,46 @@ export function BookingsPage() {
   const [bookings, setBookings] = useState<Booking[]>(initialBookings)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [editingBookingId, setEditingBookingId] = useState<string | null>(null)
-  const [form, setForm] = useState<BookingForm | null>(null)
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    reset,
+  } = useForm<Booking>({
+    defaultValues: {
+      field: "",
+      client: "",
+      date: toDateKey(today),
+      startTime: hours[0],
+      endTime: hours[1],
+      status: "Pendiente",
+    },
+    resolver: async (data) => {
+      const { error } = bookingValidationSchema.validate(data, {
+        abortEarly: false,
+        stripUnknown: true,
+      })
+
+      if (!error) {
+        return { values: data, errors: {} }
+      }
+
+      const formErrors: Record<string, { message: string }> = {}
+
+      error.details.forEach((detail) => {
+        const path = detail.path.join(".")
+        formErrors[path] = {
+          message: detail.message,
+        }
+      })
+
+      return {
+        values: {},
+        errors: formErrors,
+      }
+    },
+  })
 
   const selectedDate = useMemo(() => {
     const d = new Date(today)
@@ -125,7 +146,7 @@ export function BookingsPage() {
 
   const openEditDialog = (booking: Booking) => {
     setEditingBookingId(booking.id)
-    setForm({
+    reset({
       field: booking.field,
       client: booking.client,
       date: booking.date,
@@ -136,21 +157,27 @@ export function BookingsPage() {
     setIsDialogOpen(true)
   }
 
-  const handleSaveBooking = () => {
-    if (!editingBookingId || !form) return
+  const handleSaveBooking = (data: Booking) => {
+    if (!editingBookingId) return
 
     setBookings((prev) =>
-      prev.map((booking) => (booking.id === editingBookingId ? { ...booking, ...form } : booking))
+      prev.map((booking) => (booking.id === editingBookingId ? { ...booking, ...data } : booking))
     )
     setIsDialogOpen(false)
     setEditingBookingId(null)
-    setForm(null)
   }
 
   const handleCancel = () => {
     setIsDialogOpen(false)
     setEditingBookingId(null)
-    setForm(null)
+    reset({
+      field: "",
+      client: "",
+      date: toDateKey(today),
+      startTime: hours[0],
+      endTime: hours[1],
+      status: "Pendiente",
+    })
   }
 
   return (
@@ -309,13 +336,12 @@ export function BookingsPage() {
             <DialogTitle>Editar Reserva</DialogTitle>
             <DialogDescription>Ajusta los datos y guarda los cambios.</DialogDescription>
           </DialogHeader>
-          {form && (
-            <div className="space-y-4">
+          <form onSubmit={handleSubmit(handleSaveBooking)} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="booking-field" className="text-zinc-100">
                   Cancha
                 </Label>
-                <Select value={form.field} onValueChange={(value) => setForm((prev) => (prev ? { ...prev, field: value } : prev))}>
+                <Select value={watch("field")} onValueChange={(value) => setValue("field", value)}>
                   <SelectTrigger id="booking-field" className="bg-zinc-800 border-zinc-700">
                     <SelectValue placeholder="Seleccionar cancha" />
                   </SelectTrigger>
@@ -335,8 +361,7 @@ export function BookingsPage() {
                 </Label>
                 <Input
                   id="booking-client"
-                  value={form.client}
-                  onChange={(event) => setForm((prev) => (prev ? { ...prev, client: event.target.value } : prev))}
+                  {...register("client")}
                   className="bg-zinc-800 border-zinc-700"
                 />
               </div>
@@ -346,24 +371,21 @@ export function BookingsPage() {
                   <Label htmlFor="booking-date" className="text-zinc-100">
                     Fecha
                   </Label>
-                  <Input
-                    id="booking-date"
-                    type="date"
-                    value={form.date}
-                    onChange={(event) => setForm((prev) => (prev ? { ...prev, date: event.target.value } : prev))}
-                    className="bg-zinc-800 border-zinc-700"
-                  />
-                </div>
+                <Input
+                  id="booking-date"
+                  type="date"
+                  {...register("date")}
+                  className="bg-zinc-800 border-zinc-700"
+                />
+              </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="booking-status" className="text-zinc-100">
                     Estado
                   </Label>
-                  <Select
-                    value={form.status}
-                    onValueChange={(value) =>
-                      setForm((prev) => (prev ? { ...prev, status: value as BookingStatus } : prev))
-                    }
+                <Select
+                    value={watch("status")}
+                    onValueChange={(value) => setValue("status", value as BookingStatus)}
                   >
                     <SelectTrigger id="booking-status" className="bg-zinc-800 border-zinc-700">
                       <SelectValue placeholder="Seleccionar estado" />
@@ -382,9 +404,9 @@ export function BookingsPage() {
                   <Label htmlFor="booking-start" className="text-zinc-100">
                     Hora inicio
                   </Label>
-                  <Select
-                    value={form.startTime}
-                    onValueChange={(value) => setForm((prev) => (prev ? { ...prev, startTime: value } : prev))}
+                <Select
+                    value={watch("startTime")}
+                    onValueChange={(value) => setValue("startTime", value)}
                   >
                     <SelectTrigger id="booking-start" className="bg-zinc-800 border-zinc-700">
                       <SelectValue placeholder="Inicio" />
@@ -403,9 +425,9 @@ export function BookingsPage() {
                   <Label htmlFor="booking-end" className="text-zinc-100">
                     Hora fin
                   </Label>
-                  <Select
-                    value={form.endTime}
-                    onValueChange={(value) => setForm((prev) => (prev ? { ...prev, endTime: value } : prev))}
+                <Select
+                    value={watch("endTime")}
+                    onValueChange={(value) => setValue("endTime", value)}
                   >
                     <SelectTrigger id="booking-end" className="bg-zinc-800 border-zinc-700">
                       <SelectValue placeholder="Fin" />
@@ -426,12 +448,11 @@ export function BookingsPage() {
                 <Button type="button" variant="outline" onClick={handleCancel}>
                   Cancelar
                 </Button>
-                <Button type="button" onClick={handleSaveBooking}>
+                <Button type="submit">
                   Guardar cambios
                 </Button>
               </div>
-            </div>
-          )}
+          </form>
         </DialogContent>
       </Dialog>
     </div>
