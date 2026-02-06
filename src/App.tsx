@@ -10,11 +10,11 @@ const proximasReservas = [
 
 export function App() {
   return (
-    <div className="space-y-6">
+    <div className="p-6 lg:p-8 space-y-6">
       {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold text-white">Dashboard</h1>
-        <p className="text-zinc-400 mt-1">Resumen general del sistema</p>
+      <div className="pt-12 lg:pt-0 mb-8 space-y-2">
+        <h1 className="text-3xl lg:text-4xl font-extrabold tracking-tight text-white">Dashboard</h1>
+        <p className="text-zinc-400">Resumen general del sistema</p>
       </div>
 
       {/* Stats Grid */}

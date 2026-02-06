@@ -184,7 +184,7 @@ export function BookingsPage() {
     <div className="p-6 lg:p-8 space-y-6">
       <div className="pt-12 lg:pt-0 mb-8 space-y-5">
         <CardHeader className="p-0 space-y-2">
-          <CardTitle className="text-3xl lg:text-4xl font-extrabold tracking-tight">
+          <CardTitle className="text-3xl lg:text-4xl !font-extrabold tracking-tight text-white">
             Gestión de Reservas
           </CardTitle>
           <CardDescription className="text-zinc-400">
@@ -458,6 +458,8 @@ export function BookingsPage() {
     </div>
   )
 }
+
+
 
 
 

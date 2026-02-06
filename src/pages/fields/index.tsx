@@ -80,11 +80,15 @@ export function FieldsPage() {
   return (
     <div className="p-6 lg:p-8 space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pt-12 lg:pt-0">
-        <div>
-          <h1 className="text-2xl lg:text-3xl font-bold text-white">Gestión de Canchas</h1>
-          <p className="text-zinc-400 mt-1">Administra las canchas del complejo</p>
-        </div>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pt-12 lg:pt-0 mb-8">
+        <CardHeader className="p-0 space-y-2">
+          <CardTitle className="text-3xl lg:text-4xl !font-extrabold tracking-tight text-white">
+            Gestión de Canchas
+          </CardTitle>
+          <CardDescription className="text-zinc-400">
+            Administra las canchas del complejo
+          </CardDescription>
+        </CardHeader>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
             <Button className="bg-green-500 text-zinc-950 hover:bg-green-600">
@@ -149,3 +153,7 @@ export function FieldsPage() {
     </div>
   )
 }
+
+
+
+
