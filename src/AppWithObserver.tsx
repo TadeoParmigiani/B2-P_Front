@@ -8,7 +8,7 @@ import App from "./App";
 import { LoginForm } from "./pages/login/login";
 import ErrorPage from "./components/ErrorPage";
 import {FieldsPage}from "./pages/fields/index";
-import { BookingsPage } from "./pages/Bookings";
+import { BookingsPage } from "./pages/bookings";
 
 import Layout from "./Layout";
 

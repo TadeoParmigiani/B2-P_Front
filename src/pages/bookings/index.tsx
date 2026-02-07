@@ -145,7 +145,7 @@ export function BookingsPage() {
   }, [bookingsOfDay])
 
   const openEditDialog = (booking: Booking) => {
-    setEditingBookingId(booking.id)
+    setEditingBookingId(booking.id ?? null)
     reset({
       field: booking.field,
       client: booking.client,
@@ -319,7 +319,7 @@ export function BookingsPage() {
                             : "text-zinc-600 hover:bg-zinc-800/60"
                         }`}
                       >
-                        {isOccupied ? getClientShortName(booking.client) : "-"}
+                        {booking ? getClientShortName(booking.client) : "-"}
                       </button>
                     )
                   })}
