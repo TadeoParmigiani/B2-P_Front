@@ -37,21 +37,6 @@ const router = createBrowserRouter([
         Component: BookingsPage,
         errorElement: <ErrorPage />,
        },
-    //   {
-    //     path: "eventos",
-    //     Component: Eventos,
-    //     errorElement: <ErrorPage />,
-    //   },
-    //   {
-    //     path: "noticias",
-    //     Component: Noticias,
-    //     errorElement: <ErrorPage />,
-    //   },
-    //   {
-    //     path: "backup",
-    //     Component: Backup,
-    //     errorElement: <ErrorPage />,
-    //   },
      ],
   },
   {

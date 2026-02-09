@@ -184,7 +184,7 @@ export function BookingsPage() {
     <div className="p-6 lg:p-8 space-y-6">
       <div className="pt-12 lg:pt-0 mb-8 space-y-5">
         <CardHeader className="p-0 space-y-2">
-          <CardTitle className="text-3xl lg:text-4xl !font-extrabold tracking-tight text-white">
+          <CardTitle className="text-3xl lg:text-4xl tracking-tight text-white">
             Gestión de Reservas
           </CardTitle>
           <CardDescription className="text-zinc-400">
@@ -249,7 +249,7 @@ export function BookingsPage() {
                     </p>
                   </div>
                   </div>
-                  <CardFooter className="!p-0 !pt-0 self-stretch flex items-center justify-center">
+                  <CardFooter className=" self-stretch flex items-center justify-center">
                     <Button
                       variant="ghost"
                       size="sm"
@@ -282,7 +282,7 @@ export function BookingsPage() {
           </CardDescription>
         </CardHeader>
         <Card className="bg-zinc-900 border-zinc-800 overflow-x-auto">
-          <CardContent className="p-0 min-w-[780px]">
+          <CardContent className="p-0">
             <div className="grid grid-cols-[90px_repeat(6,minmax(0,1fr))]">
               <div className="h-12 px-1 flex items-center justify-center border-b border-r border-zinc-800 text-xs text-zinc-500 uppercase text-center">
                 Hora

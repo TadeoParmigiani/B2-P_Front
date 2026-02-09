@@ -1,6 +1,6 @@
 import { configureStore } from "@reduxjs/toolkit";
 import authReducer from "../features/authSlice";
-
+import fieldsReducer from "../features/fieldSlices";
 
 // Configuración del store de Redux
 export const store = configureStore({
@@ -9,7 +9,7 @@ export const store = configureStore({
     auth: authReducer,
     
     // Datos principales
-
+    fields: fieldsReducer,
    },
 });
 

@@ -1,3 +1,4 @@
+import { useEffect } from "react"
 import { useForm } from "react-hook-form"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -20,22 +21,16 @@ export function FieldForm({ editingField, onSubmit, onCancel }: FieldFormProps) 
     handleSubmit,
     setValue,
     watch,
+    reset,
     formState: { errors },
   } = useForm<FieldFormType>({
-    defaultValues: editingField
-      ? {
-          id: editingField.id,
-          name: editingField.name,
-          type: editingField.type,
-          pricePerHour: editingField.pricePerHour,
-          isActive: editingField.isActive,
-        }
-      : {
-          name: "",
-          type: "",
-          pricePerHour: 0,
-          isActive: true,
-        },
+    defaultValues: {
+      name: "",
+      type: "CANCHA 5",
+      pricePerHour: 0,
+      isActive: true,
+      description: "",
+    },
     resolver: async (data) => {
       const { error } = validationSchema.validate(data, {
         abortEarly: false,
@@ -62,6 +57,25 @@ export function FieldForm({ editingField, onSubmit, onCancel }: FieldFormProps) 
     },
   })
 
+  // Resetear el formulario cuando cambia editingField
+  useEffect(() => {
+    if (editingField) {
+      setValue("name", editingField.name)
+      setValue("type", editingField.type)
+      setValue("pricePerHour", editingField.pricePerHour)
+      setValue("isActive", editingField.isActive)
+      setValue("description", editingField.description || "")
+    } else {
+      reset({
+        name: "",
+        type: "CANCHA 5",
+        pricePerHour: 0,
+        isActive: true,
+        description: "",
+      })
+    }
+  }, [editingField, setValue, reset])
+
   const watchType = watch("type")
   const watchIsActive = watch("isActive")
 
@@ -78,7 +92,8 @@ export function FieldForm({ editingField, onSubmit, onCancel }: FieldFormProps) 
         <Input
           id="name"
           {...register("name")}
-          className="bg-zinc-800 border-zinc-700"
+          className="bg-zinc-800 border-zinc-700 text-white"
+          placeholder="Ej: Cancha Principal"
         />
         {errors.name && (
           <p className="text-red-500 text-sm">{errors.name.message}</p>
@@ -92,15 +107,15 @@ export function FieldForm({ editingField, onSubmit, onCancel }: FieldFormProps) 
           </Label>
           <Select
             value={watchType}
-            onValueChange={(value) => setValue("type", value, { shouldValidate: true })}
+            onValueChange={(value) => setValue("type", value as "CANCHA 5" | "CANCHA 7" | "CANCHA 11" | "PADEL", { shouldValidate: true })}
           >
-            <SelectTrigger className="bg-zinc-800 border-zinc-700">
+            <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white">
               <SelectValue placeholder="Seleccionar" />
             </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="CANCHA 5">Cancha 5</SelectItem>
-              <SelectItem value="CANCHA 7">Cancha 7</SelectItem>
-              <SelectItem value="CANCHA 11">Cancha 11</SelectItem>
+            <SelectContent className="bg-zinc-800 border-zinc-700">
+              <SelectItem value="CANCHA 5" className="text-white">Cancha 5</SelectItem>
+              <SelectItem value="CANCHA 7" className="text-white">Cancha 7</SelectItem>
+              <SelectItem value="CANCHA 11" className="text-white">Cancha 11</SelectItem>
             </SelectContent>
           </Select>
           {errors.type && (
@@ -117,12 +132,28 @@ export function FieldForm({ editingField, onSubmit, onCancel }: FieldFormProps) 
             type="number"
             step="0.01"
             {...register("pricePerHour", { valueAsNumber: true })}
-            className="bg-zinc-800 border-zinc-700"
+            className="bg-zinc-800 border-zinc-700 text-white"
+            placeholder="15000"
           />
           {errors.pricePerHour && (
             <p className="text-red-500 text-sm">{errors.pricePerHour.message}</p>
           )}
         </div>
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="description" className="text-zinc-100">
+          Descripción
+        </Label>
+        <Input
+          id="description"
+          {...register("description")}
+          className="bg-zinc-800 border-zinc-700 text-white"
+          placeholder="Descripción de la cancha"
+        />
+        {errors.description && (
+          <p className="text-red-500 text-sm">{errors.description.message}</p>
+        )}
       </div>
 
       <div className="space-y-2">
@@ -133,12 +164,12 @@ export function FieldForm({ editingField, onSubmit, onCancel }: FieldFormProps) 
           value={watchIsActive ? "true" : "false"}
           onValueChange={(value) => setValue("isActive", value === "true", { shouldValidate: true })}
         >
-          <SelectTrigger className="bg-zinc-800 border-zinc-700">
+          <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white">
             <SelectValue />
           </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="true">Activa</SelectItem>
-            <SelectItem value="false">Inactiva</SelectItem>
+          <SelectContent className="bg-zinc-800 border-zinc-700">
+            <SelectItem value="true" className="text-white">Activa</SelectItem>
+            <SelectItem value="false" className="text-white">Inactiva</SelectItem>
           </SelectContent>
         </Select>
         {errors.isActive && (
