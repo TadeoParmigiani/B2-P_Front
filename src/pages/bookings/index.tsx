@@ -1,23 +1,16 @@
 ﻿import { useEffect, useMemo, useState } from "react"
-import { useForm } from "react-hook-form"
-import { Calendar, ChevronLeft, ChevronRight, Clock3, Loader2, Pencil } from "lucide-react"
+import { Calendar, ChevronLeft, ChevronRight, Clock3, Loader2 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import type { Booking, BookingStatus } from "@/types/types"
-import { bookingValidationSchema } from "@/components/validations/bookings"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import type { BookingStatus } from "@/types/types"
 import { useAppDispatch, useAppSelector } from "@/store/hooks"
-import { fetchBookings, selectAllBookings, selectBookingsError, selectBookingsLoading, updateBooking } from "@/features/bookingSlices"
+import { 
+  fetchBookings, 
+  selectAllBookings, 
+  selectBookingsError, 
+  selectBookingsStatus
+} from "@/features/bookingSlices"
 import { fetchFields, selectAllFields } from "@/features/fieldSlices"
 
 const hours = Array.from({ length: 13 }, (_, i) => `${(8 + i).toString().padStart(2, "0")}:00`)
@@ -65,64 +58,17 @@ function getClientShortName(client: string) {
 
 export function BookingsPage() {
   const dispatch = useAppDispatch()
-  const storeBookings = useAppSelector(selectAllBookings) ?? []
+  const bookings = useAppSelector(selectAllBookings) ?? []
   const complexFields = useAppSelector(selectAllFields) ?? []
-  const loading = useAppSelector(selectBookingsLoading)
+  const status = useAppSelector(selectBookingsStatus)
   const error = useAppSelector(selectBookingsError)
 
   const [dayOffset, setDayOffset] = useState(0)
-  const [bookings, setBookings] = useState<Booking[]>([])
-  const [isDialogOpen, setIsDialogOpen] = useState(false)
-  const [editingBookingId, setEditingBookingId] = useState<string | null>(null)
-  const {
-    register,
-    handleSubmit,
-    setValue,
-    watch,
-    reset,
-  } = useForm<Booking>({
-    defaultValues: {
-      field: "",
-      client: "",
-      date: toDateKey(today),
-      startTime: hours[0],
-      endTime: hours[1],
-      status: "Pendiente",
-    },
-    resolver: async (data) => {
-      const { error } = bookingValidationSchema.validate(data, {
-        abortEarly: false,
-        stripUnknown: true,
-      })
-
-      if (!error) {
-        return { values: data, errors: {} }
-      }
-
-      const formErrors: Record<string, { message: string }> = {}
-
-      error.details.forEach((detail) => {
-        const path = detail.path.join(".")
-        formErrors[path] = {
-          message: detail.message,
-        }
-      })
-
-      return {
-        values: {},
-        errors: formErrors,
-      }
-    },
-  })
 
   useEffect(() => {
     dispatch(fetchBookings())
     dispatch(fetchFields(undefined))
   }, [dispatch])
-
-  useEffect(() => {
-    setBookings(storeBookings)
-  }, [storeBookings])
 
   const selectedDate = useMemo(() => {
     const d = new Date(today)
@@ -156,7 +102,7 @@ export function BookingsPage() {
   )
 
   const bookingIndex = useMemo(() => {
-    const index = new Map<string, Booking>()
+    const index = new Map()
     bookingsOfDay.forEach((booking) => {
       const startHour = Number.parseInt(booking.startTime.split(":")[0], 10)
       const endHour = Number.parseInt(booking.endTime.split(":")[0], 10)
@@ -168,48 +114,7 @@ export function BookingsPage() {
     return index
   }, [bookingsOfDay])
 
-  const openEditDialog = (booking: Booking) => {
-    setEditingBookingId(booking.id ?? null)
-    reset({
-      field: booking.field,
-      client: booking.client,
-      date: booking.date,
-      startTime: booking.startTime,
-      endTime: booking.endTime,
-      status: booking.status,
-    })
-    setIsDialogOpen(true)
-  }
-
-  const handleSaveBooking = async (data: Booking) => {
-    if (!editingBookingId) return
-
-    try {
-      await dispatch(updateBooking({ id: editingBookingId, data: { playerName: data.client } })).unwrap()
-      await dispatch(fetchBookings()).unwrap()
-
-      setBookings((prev) =>
-        prev.map((booking) => (booking.id === editingBookingId ? { ...booking, ...data } : booking))
-      )
-      setIsDialogOpen(false)
-      setEditingBookingId(null)
-    } catch (err) {
-      console.error("Error al actualizar reserva:", err)
-    }
-  }
-
-  const handleCancel = () => {
-    setIsDialogOpen(false)
-    setEditingBookingId(null)
-    reset({
-      field: "",
-      client: "",
-      date: toDateKey(today),
-      startTime: hours[0],
-      endTime: hours[1],
-      status: "Pendiente",
-    })
-  }
+  const loading = status === 'loading'
 
   return (
     <div className="p-6 lg:p-8 space-y-6">
@@ -268,15 +173,14 @@ export function BookingsPage() {
           {!loading && bookingsOfDay.map((booking) => (
             <Card
               key={booking.id}
-              className="bg-black border border-white/10 shadow-lg transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl"
+              className="bg-black border border-white/10 shadow-lg"
             >
               <CardContent className="p-5 sm:p-6">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 min-h-12">
-                  <div className="flex items-center gap-4 min-w-0 pr-2 sm:pr-4">
+                <div className="flex items-center gap-4">
                   <div className="w-11 h-11 rounded-full bg-green-900/40 border border-green-500/30 shadow-[0_0_20px_rgba(34,197,94,0.2)] flex items-center justify-center shrink-0">
                     <Clock3 className="h-5 w-5 text-green-500" />
                   </div>
-                  <div className="min-w-0">
+                  <div className="flex-1 min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
                       <p className="font-semibold text-white">
                         {booking.startTime} - {booking.endTime}
@@ -289,18 +193,6 @@ export function BookingsPage() {
                       {booking.field} - {booking.client}
                     </p>
                   </div>
-                  </div>
-                  <CardFooter className=" self-stretch flex items-center justify-center">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-8 px-4 border border-white/10 text-zinc-200 hover:bg-zinc-800 rounded-md"
-                      onClick={() => openEditDialog(booking)}
-                    >
-                      <Pencil className="h-4 w-4 mr-2" />
-                      Editar
-                    </Button>
-                  </CardFooter>
                 </div>
               </CardContent>
             </Card>
@@ -346,22 +238,16 @@ export function BookingsPage() {
                     const booking = bookingIndex.get(`${field}-${hour}`)
                     const isOccupied = Boolean(booking)
                     return (
-                      <button
+                      <div
                         key={`${field}-${hour}`}
-                        type="button"
-                        onClick={() => {
-                          if (booking) {
-                            openEditDialog(booking)
-                          }
-                        }}
-                        className={`h-12 border-b border-zinc-800 text-sm transition-colors ${
+                        className={`h-12 border-b border-zinc-800 text-sm flex items-center justify-center ${
                           isOccupied
-                            ? "bg-green-500/10 text-green-400 hover:bg-green-500/20"
-                            : "text-zinc-600 hover:bg-zinc-800/60"
+                            ? "bg-green-500/10 text-green-400"
+                            : "text-zinc-600"
                         }`}
                       >
                         {booking ? getClientShortName(booking.client) : "-"}
-                      </button>
+                      </div>
                     )
                   })}
                 </div>
@@ -370,132 +256,6 @@ export function BookingsPage() {
           </CardContent>
         </Card>
       </section>
-
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="bg-zinc-900 border-zinc-800">
-          <DialogHeader>
-            <DialogTitle>Editar Reserva</DialogTitle>
-            <DialogDescription>Ajusta los datos y guarda los cambios.</DialogDescription>
-          </DialogHeader>
-          <form onSubmit={handleSubmit(handleSaveBooking)} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="booking-field" className="text-zinc-100">
-                  Cancha
-                </Label>
-                <Select value={watch("field")} onValueChange={(value) => setValue("field", value)}>
-                  <SelectTrigger id="booking-field" className="bg-zinc-800 border-zinc-700">
-                    <SelectValue placeholder="Seleccionar cancha" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {fields.map((field) => (
-                      <SelectItem key={field} value={field}>
-                        {field}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="booking-client" className="text-zinc-100">
-                  Cliente
-                </Label>
-                <Input
-                  id="booking-client"
-                  {...register("client")}
-                  className="bg-zinc-800 border-zinc-700"
-                />
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="booking-date" className="text-zinc-100">
-                    Fecha
-                  </Label>
-                <Input
-                  id="booking-date"
-                  type="date"
-                  {...register("date")}
-                  className="bg-zinc-800 border-zinc-700"
-                />
-              </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="booking-status" className="text-zinc-100">
-                    Estado
-                  </Label>
-                <Select
-                    value={watch("status")}
-                    onValueChange={(value) => setValue("status", value as BookingStatus)}
-                  >
-                    <SelectTrigger id="booking-status" className="bg-zinc-800 border-zinc-700">
-                      <SelectValue placeholder="Seleccionar estado" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Pendiente">Pendiente</SelectItem>
-                      <SelectItem value="Confirmada">Confirmada</SelectItem>
-                      <SelectItem value="Cancelada">Cancelada</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="booking-start" className="text-zinc-100">
-                    Hora inicio
-                  </Label>
-                <Select
-                    value={watch("startTime")}
-                    onValueChange={(value) => setValue("startTime", value)}
-                  >
-                    <SelectTrigger id="booking-start" className="bg-zinc-800 border-zinc-700">
-                      <SelectValue placeholder="Inicio" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {hours.map((hour) => (
-                        <SelectItem key={hour} value={hour}>
-                          {hour}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="booking-end" className="text-zinc-100">
-                    Hora fin
-                  </Label>
-                <Select
-                    value={watch("endTime")}
-                    onValueChange={(value) => setValue("endTime", value)}
-                  >
-                    <SelectTrigger id="booking-end" className="bg-zinc-800 border-zinc-700">
-                      <SelectValue placeholder="Fin" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {hours.slice(1).map((hour) => (
-                        <SelectItem key={hour} value={hour}>
-                          {hour}
-                        </SelectItem>
-                      ))}
-                      <SelectItem value="21:00">21:00</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              <div className="flex justify-end gap-2 pt-2">
-                <Button type="button" variant="outline" onClick={handleCancel}>
-                  Cancelar
-                </Button>
-                <Button type="submit">
-                  Guardar cambios
-                </Button>
-              </div>
-          </form>
-        </DialogContent>
-      </Dialog>
     </div>
   )
 }

@@ -21,6 +21,16 @@ export const bookingValidationSchema = Joi.object({
       "string.max": "El cliente no debe exceder 100 caracteres",
       "any.required": "El cliente es requerido",
     }),
+  tel: Joi.string()
+    .trim()
+    .pattern(/^[0-9]{7,15}$/)
+    .required()
+    .messages({
+      "string.base": "El teléfono debe ser un texto",
+      "string.empty": "El teléfono es requerido",
+      "string.pattern.base": "El teléfono debe contener entre 7 y 15 dígitos",
+      "any.required": "El teléfono es requerido",
+    }),
   date: Joi.string()
     .pattern(/^\d{4}-\d{2}-\d{2}$/)
     .required()
@@ -30,20 +40,18 @@ export const bookingValidationSchema = Joi.object({
       "any.required": "La fecha es requerida",
     }),
   startTime: Joi.string()
-    .pattern(/^\d{2}:\d{2}$/)
+    .pattern(/^([0-1][0-9]|2[0-3]):[0-5][0-9]$/)
     .required()
     .messages({
-      "string.base": "La hora de inicio debe ser un texto",
-      "string.pattern.base": "La hora de inicio debe tener el formato HH:MM",
-      "any.required": "La hora de inicio es requerida",
+      "string.base": "El horario debe ser un texto",
+      "string.pattern.base": "El horario debe tener el formato HH:MM",
+      "any.required": "El horario es requerido",
     }),
   endTime: Joi.string()
-    .pattern(/^\d{2}:\d{2}$/)
-    .required()
+    .pattern(/^([0-1][0-9]|2[0-3]):[0-5][0-9]$/)
+    .optional()
     .messages({
-      "string.base": "La hora de fin debe ser un texto",
-      "string.pattern.base": "La hora de fin debe tener el formato HH:MM",
-      "any.required": "La hora de fin es requerida",
+      "string.pattern.base": "El horario de fin debe tener el formato HH:MM",
     }),
   status: Joi.string()
     .valid("Confirmada", "Pendiente", "Cancelada")
