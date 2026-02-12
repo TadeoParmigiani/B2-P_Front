@@ -1,6 +1,6 @@
-import { useMemo, useState } from "react"
+﻿import { useEffect, useMemo, useState } from "react"
 import { useForm } from "react-hook-form"
-import { Calendar, ChevronLeft, ChevronRight, Clock3, Pencil } from "lucide-react"
+import { Calendar, ChevronLeft, ChevronRight, Clock3, Loader2, Pencil } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
@@ -16,8 +16,10 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import type { Booking, BookingStatus } from "@/types/types"
 import { bookingValidationSchema } from "@/components/validations/bookings"
+import { useAppDispatch, useAppSelector } from "@/store/hooks"
+import { fetchBookings, selectAllBookings, selectBookingsError, selectBookingsLoading, updateBooking } from "@/features/bookingSlices"
+import { fetchFields, selectAllFields } from "@/features/fieldSlices"
 
-const fields = ["CPrincipal", "C2", "C3", "C5", "C6", "C8"]
 const hours = Array.from({ length: 13 }, (_, i) => `${(8 + i).toString().padStart(2, "0")}:00`)
 
 function getNextHourLabel(hour: string) {
@@ -27,13 +29,6 @@ function getNextHourLabel(hour: string) {
 }
 
 const today = new Date()
-
-const initialBookings: Booking[] = [
-  { id: "1", date: toDateKey(today), field: "CPrincipal", client: "Juan Perez", startTime: "16:00", endTime: "17:00", status: "Confirmada" },
-  { id: "2", date: toDateKey(today), field: "C2", client: "Maria Garcia", startTime: "17:00", endTime: "18:00", status: "Pendiente" },
-  { id: "3", date: toDateKey(today), field: "C3", client: "Carlos Lopez", startTime: "18:00", endTime: "19:00", status: "Cancelada" },
-  { id: "4", date: toDateKey(today), field: "C5", client: "Ana Martinez", startTime: "10:00", endTime: "11:00", status: "Confirmada" },
-]
 
 function toDateKey(date: Date) {
   return date.toISOString().split("T")[0]
@@ -69,8 +64,14 @@ function getClientShortName(client: string) {
 }
 
 export function BookingsPage() {
+  const dispatch = useAppDispatch()
+  const storeBookings = useAppSelector(selectAllBookings) ?? []
+  const complexFields = useAppSelector(selectAllFields) ?? []
+  const loading = useAppSelector(selectBookingsLoading)
+  const error = useAppSelector(selectBookingsError)
+
   const [dayOffset, setDayOffset] = useState(0)
-  const [bookings, setBookings] = useState<Booking[]>(initialBookings)
+  const [bookings, setBookings] = useState<Booking[]>([])
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [editingBookingId, setEditingBookingId] = useState<string | null>(null)
   const {
@@ -114,6 +115,15 @@ export function BookingsPage() {
     },
   })
 
+  useEffect(() => {
+    dispatch(fetchBookings())
+    dispatch(fetchFields(undefined))
+  }, [dispatch])
+
+  useEffect(() => {
+    setBookings(storeBookings)
+  }, [storeBookings])
+
   const selectedDate = useMemo(() => {
     const d = new Date(today)
     d.setDate(today.getDate() + dayOffset)
@@ -122,6 +132,20 @@ export function BookingsPage() {
 
   const selectedDateKey = toDateKey(selectedDate)
   const selectedDateLabel = toCapitalizedDateLabel(selectedDate)
+
+  const fields = useMemo(() => {
+    const activeFieldNames = complexFields
+      .filter((field) => field.isActive)
+      .map((field) => field.name)
+
+    if (activeFieldNames.length) return activeFieldNames
+
+    const allFieldNames = complexFields.map((field) => field.name)
+    if (allFieldNames.length) return allFieldNames
+
+    const bookingFieldNames = Array.from(new Set(bookings.map((booking) => booking.field)))
+    return bookingFieldNames.length ? bookingFieldNames : ["CPrincipal", "C2", "C3", "C5", "C6", "C8"]
+  }, [bookings, complexFields])
 
   const bookingsOfDay = useMemo(
     () =>
@@ -157,14 +181,21 @@ export function BookingsPage() {
     setIsDialogOpen(true)
   }
 
-  const handleSaveBooking = (data: Booking) => {
+  const handleSaveBooking = async (data: Booking) => {
     if (!editingBookingId) return
 
-    setBookings((prev) =>
-      prev.map((booking) => (booking.id === editingBookingId ? { ...booking, ...data } : booking))
-    )
-    setIsDialogOpen(false)
-    setEditingBookingId(null)
+    try {
+      await dispatch(updateBooking({ id: editingBookingId, data: { playerName: data.client } })).unwrap()
+      await dispatch(fetchBookings()).unwrap()
+
+      setBookings((prev) =>
+        prev.map((booking) => (booking.id === editingBookingId ? { ...booking, ...data } : booking))
+      )
+      setIsDialogOpen(false)
+      setEditingBookingId(null)
+    } catch (err) {
+      console.error("Error al actualizar reserva:", err)
+    }
   }
 
   const handleCancel = () => {
@@ -223,8 +254,18 @@ export function BookingsPage() {
             Reservas del día <span className="text-zinc-300">({bookingsOfDay.length})</span>
           </CardTitle>
         </CardHeader>
+        {error && (
+          <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4">
+            <p className="text-red-500 text-sm">{error}</p>
+          </div>
+        )}
+        {loading && (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="h-8 w-8 animate-spin text-green-500" />
+          </div>
+        )}
         <div className="space-y-4">
-          {bookingsOfDay.map((booking) => (
+          {!loading && bookingsOfDay.map((booking) => (
             <Card
               key={booking.id}
               className="bg-black border border-white/10 shadow-lg transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl"
@@ -264,7 +305,7 @@ export function BookingsPage() {
               </CardContent>
             </Card>
           ))}
-          {!bookingsOfDay.length && (
+          {!loading && !bookingsOfDay.length && (
             <Card className="bg-black border border-white/10 shadow-lg">
               <CardContent className="p-6 text-center text-zinc-400">
                 No hay reservas cargadas para esta fecha.
@@ -283,7 +324,7 @@ export function BookingsPage() {
         </CardHeader>
         <Card className="bg-zinc-900 border-zinc-800 overflow-x-auto">
           <CardContent className="p-0">
-            <div className="grid grid-cols-[90px_repeat(6,minmax(0,1fr))]">
+            <div className="grid" style={{ gridTemplateColumns: `90px repeat(${fields.length}, minmax(0,1fr))` }}>
               <div className="h-12 px-1 flex items-center justify-center border-b border-r border-zinc-800 text-xs text-zinc-500 uppercase text-center">
                 Hora
               </div>
@@ -458,11 +499,3 @@ export function BookingsPage() {
     </div>
   )
 }
-
-
-
-
-
-
-
-
