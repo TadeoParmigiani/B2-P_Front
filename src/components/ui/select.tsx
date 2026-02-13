@@ -120,19 +120,18 @@ function SelectContent({ className, children, ...props }: SelectContentProps) {
     }
   }, [open, setOpen])
 
-  if (!open) return null
-
-  const classes = `absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-md border border-zinc-800 bg-zinc-900 text-zinc-100 shadow-md ${className || ""}`
+  const classes = `absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-md border border-zinc-800 bg-zinc-900 text-zinc-100 shadow-md ${
+    open ? "" : "hidden"
+  } ${className || ""}`
 
   return (
     <div
       ref={contentRef}
       className={classes}
+      aria-hidden={!open}
       {...props}
     >
-      <div className="p-1">
-        {children}
-      </div>
+      <div className="p-1">{children}</div>
     </div>
   )
 }
@@ -145,33 +144,42 @@ function SelectItem({ className, children, value, ...props }: SelectItemProps) {
   const { value: selectedValue, onValueChange, setDisplayValue } = useSelect()
   const isSelected = selectedValue === value
   
+  const label = React.useMemo(() => getNodeText(children).trim(), [children])
+
   const handleClick = () => {
     onValueChange(value)
-    if (typeof children === "string") {
-      setDisplayValue(children)
-    }
+    setDisplayValue(label)
   }
-  
+
   React.useEffect(() => {
-    if (isSelected && typeof children === "string") {
-      setDisplayValue(children)
+    if (isSelected) {
+      setDisplayValue(label)
     }
-  }, [isSelected, children, setDisplayValue])
-  
+  }, [isSelected, label, setDisplayValue])
+
   const classes = `relative flex w-full cursor-pointer select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none hover:bg-zinc-800 hover:text-white ${isSelected ? "bg-zinc-800" : ""} ${className || ""}`
   
   return (
-    <div
-      className={classes}
-      onClick={handleClick}
-      {...props}
-    >
+    <div className={classes} onClick={handleClick} {...props}>
       <span className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
         {isSelected && <Check className="h-4 w-4 text-green-500" />}
       </span>
       {children}
     </div>
   )
+}
+
+function getNodeText(node: React.ReactNode): string {
+  if (node == null) return ""
+  if (typeof node === "string" || typeof node === "number") return String(node)
+  if (Array.isArray(node)) return node.map(getNodeText).join("")
+
+  if (React.isValidElement(node)) {
+    const element = node as React.ReactElement<{ children?: React.ReactNode }>
+    return getNodeText(element.props.children)
+  }
+
+  return ""
 }
 
 export {

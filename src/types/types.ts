@@ -40,7 +40,6 @@ export interface Booking {
   client: string
   startTime: string
   endTime: string
-  status: BookingStatus
   tel?: string
   scheduleId?: string // Agregar
 }

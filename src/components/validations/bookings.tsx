@@ -39,26 +39,4 @@ export const bookingValidationSchema = Joi.object({
       "string.pattern.base": "La fecha debe tener el formato AAAA-MM-DD",
       "any.required": "La fecha es requerida",
     }),
-  startTime: Joi.string()
-    .pattern(/^([0-1][0-9]|2[0-3]):[0-5][0-9]$/)
-    .required()
-    .messages({
-      "string.base": "El horario debe ser un texto",
-      "string.pattern.base": "El horario debe tener el formato HH:MM",
-      "any.required": "El horario es requerido",
-    }),
-  endTime: Joi.string()
-    .pattern(/^([0-1][0-9]|2[0-3]):[0-5][0-9]$/)
-    .optional()
-    .messages({
-      "string.pattern.base": "El horario de fin debe tener el formato HH:MM",
-    }),
-  status: Joi.string()
-    .valid("Confirmada", "Pendiente", "Cancelada")
-    .required()
-    .messages({
-      "string.base": "El estado debe ser un texto",
-      "any.only": "El estado debe ser Confirmada, Pendiente o Cancelada",
-      "any.required": "El estado es requerido",
-    }),
 })
