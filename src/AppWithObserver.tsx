@@ -28,12 +28,12 @@ const router = createBrowserRouter([
          errorElement: <ErrorPage />,
        },
        {
-        path: "filds",         
+        path: "fields",         
         Component: FieldsPage, 
         errorElement: <ErrorPage />,
         },
        {
-        path: "reservas",
+        path: "bookings",
         Component: BookingsPage,
         errorElement: <ErrorPage />,
        },
