@@ -1,16 +1,6 @@
-// src/types/Field.ts
-
-export interface FieldBase {
-  name: string;
-  type: string;
-  pricePerHour: number;
-  isActive: boolean;
-}
-
-// Cancha completa (la que usa FieldsPage)
-export interface Field extends FieldBase {
+export interface Field {
   id: string;
-  _id?: string; // MongoDB ID
+  _id?: string;
   name: string;
   type: "CANCHA 5" | "CANCHA 7" | "CANCHA 11" | "PADEL";
   pricePerHour: number;
@@ -20,8 +10,7 @@ export interface Field extends FieldBase {
   updatedAt?: string;
 }
 
-// Cancha usada en el modal (crear/editar)
-export interface FieldForm extends FieldBase {
+export interface FieldForm {
   id?: string;
   name: string;
   type: "CANCHA 5" | "CANCHA 7" | "CANCHA 11" | "PADEL";
@@ -30,16 +19,14 @@ export interface FieldForm extends FieldBase {
   description?: string;
 }
 
-export type BookingStatus = "Confirmada" | "Pendiente" | "Cancelada";
-
 export interface Booking {
-  id?: string
-  date: string
-  field: string
-  fieldId?: string // Agregar
-  client: string
-  startTime: string
-  endTime: string
-  tel?: string
-  scheduleId?: string // Agregar
+  id?: string;
+  date: string;
+  field: string;
+  fieldId?: string;
+  client: string;
+  startTime: string;
+  endTime: string;
+  tel?: string;
+  scheduleId?: string;
 }

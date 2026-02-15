@@ -62,7 +62,7 @@ export function App() {
     }
   }, [allBookings, allFields, fieldsStats])
   
-  // Próximas reservas (primeras 4 de hoy)
+  // Próximas reservas 
   const proximasReservas = useMemo(() => {
     return dashboardStats.bookingsTodayList
       .sort((a, b) => a.startTime.localeCompare(b.startTime))

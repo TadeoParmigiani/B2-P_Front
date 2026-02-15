@@ -13,12 +13,13 @@ import {
 } from "firebase/auth";
 import { auth } from "@/firebase/firebase";
 import type { RootState } from "../store/store";
+import { firebaseAxios } from "@/config/axios";
 
-// Define the shape of our user data
 export interface AuthUser {
   uid: string;
   email: string | null;
   token: string;
+  isAdmin: boolean;
 }
 
 interface AuthState {
@@ -33,7 +34,6 @@ const initialState: AuthState = {
   error: null,
 };
 
-// ✅ Función para convertir errores de Firebase a mensajes amigables
 const getFirebaseErrorMessage = (errorCode: string): string => {
   const errorMessages: Record<string, string> = {
     'auth/invalid-credential': 'Credenciales incorrectas. Verifica tu email y contraseña.',
@@ -42,7 +42,6 @@ const getFirebaseErrorMessage = (errorCode: string): string => {
   return errorMessages[errorCode] || 'Error al iniciar sesión. Intenta nuevamente.'
 }
 
-// Register new user
 export const registerUser = createAsyncThunk<
   AuthUser,
   { email: string; password: string },
@@ -55,10 +54,20 @@ export const registerUser = createAsyncThunk<
       password
     );
     const user = userCredential.user;
+    const token = await user.getIdToken();
+
+    const response = await firebaseAxios.get('/users/verify-admin');
+    
+    if (!response.data.isAdmin) {
+      await signOut(auth);
+      return rejectWithValue('No tienes permisos de administrador.');
+    }
+
     return {
       uid: user.uid,
       email: user.email,
-      token: await user.getIdToken(),
+      token,
+      isAdmin: response.data.isAdmin,
     };
   } catch (error: any) {
     const errorCode = error.code || error.message;
@@ -66,7 +75,6 @@ export const registerUser = createAsyncThunk<
   }
 });
 
-// Login existing user
 export const loginUser = createAsyncThunk<
   AuthUser,
   { email: string; password: string },
@@ -76,19 +84,28 @@ export const loginUser = createAsyncThunk<
   async ({ email, password }, { rejectWithValue, dispatch }) => {
     try {
       dispatch(setLoading(true));
-      const userCredential = await signInWithEmailAndPassword(
-        auth,
-        email,
-        password
-      );
-
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
+      const token = await user.getIdToken();
+
+      const response = await firebaseAxios.get('/users/verify-admin');
+      
+      if (!response.data.isAdmin) {
+        await signOut(auth);
+        return rejectWithValue('No tienes permisos de administrador para acceder a este panel.');
+      }
+
       return {
         uid: user.uid,
         email: user.email,
-        token: await user.getIdToken(),
+        token,
+        isAdmin: response.data.isAdmin,
       };
     } catch (error: any) {
+      if (error.response?.status === 403 || error.response?.status === 404) {
+        await signOut(auth);
+        return rejectWithValue('No tienes permisos de administrador para acceder a este panel.');
+      }
       const errorCode = error.code || error.message;
       return rejectWithValue(getFirebaseErrorMessage(errorCode));
     } finally {
@@ -97,7 +114,6 @@ export const loginUser = createAsyncThunk<
   }
 );
 
-// Logout user
 export const logoutUser = createAsyncThunk<
   void,
   void,
@@ -111,16 +127,28 @@ export const logoutUser = createAsyncThunk<
   }
 });
 
-// Observe Firebase user state
 export const observeUser = () => (dispatch: Dispatch) => {
   const unsubscribe = onAuthStateChanged(auth, async (user: User | null) => {
     dispatch(setLoading(true));
     if (user) {
       try {
         const token = await user.getIdToken();
-        dispatch(setUser({ uid: user.uid, email: user.email, token }));
+        const response = await firebaseAxios.get('/users/verify-admin');
+        
+        if (!response.data.isAdmin) {
+          await signOut(auth);
+          dispatch(clearUser());
+          dispatch(setLoading(false));
+          return;
+        }
+        
+        dispatch(setUser({ 
+          uid: user.uid, 
+          email: user.email, 
+          token,
+          isAdmin: response.data.isAdmin 
+        }));
       } catch (error) {
-        console.error("Error al obtener token:", error);
         dispatch(clearUser());
       }
     } else {
@@ -129,7 +157,6 @@ export const observeUser = () => (dispatch: Dispatch) => {
     dispatch(setLoading(false));
   });
   
-  // Retornar la función de cleanup
   return unsubscribe;
 };
 
@@ -152,7 +179,6 @@ const authSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      // Register
       .addCase(registerUser.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -163,10 +189,8 @@ const authSlice = createSlice({
       })
       .addCase(registerUser.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload || "Error al registrar usuario";
+        state.error = action.payload ?? "Error al registrar usuario";
       })
-
-      // Login
       .addCase(loginUser.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -177,10 +201,8 @@ const authSlice = createSlice({
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload || "Error al iniciar sesión";
+        state.error = action.payload ?? "Error al iniciar sesión";
       })
-
-      // Logout
       .addCase(logoutUser.pending, (state) => {
         state.loading = true;
       })
@@ -191,7 +213,7 @@ const authSlice = createSlice({
       })
       .addCase(logoutUser.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload || "Error al cerrar sesión";
+        state.error = action.payload ?? "Error al cerrar sesión";
       });
   },
 });

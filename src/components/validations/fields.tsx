@@ -1,6 +1,5 @@
 import Joi from 'joi';
 
-// Esquema de validación para crear un campo
 export const createFieldValidationSchema = Joi.object({
   name: Joi.string()
     .trim()
@@ -43,7 +42,6 @@ export const createFieldValidationSchema = Joi.object({
     })
 });
 
-// Esquema de validación para actualizar un campo 
 export const updateFieldValidationSchema = Joi.object({
   name: Joi.string()
     .trim()

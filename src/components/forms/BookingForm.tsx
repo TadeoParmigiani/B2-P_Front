@@ -12,14 +12,12 @@ const DAYS = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "
 function getDayNameFromDate(dateStr: string) {
   if (!dateStr) return "Lunes"
 
-  // yyyy-mm-dd
   if (dateStr.includes("-")) {
     const [y, m, d] = dateStr.split("-").map(Number)
     const dt = new Date(y, (m || 1) - 1, d || 1)
     if (!Number.isNaN(dt.getTime())) return DAYS[dt.getDay()] ?? "Lunes"
   }
 
-  // dd/mm/yyyy
   if (dateStr.includes("/")) {
     const [d, m, y] = dateStr.split("/").map(Number)
     const dt = new Date(y || 2000, (m || 1) - 1, d || 1)
@@ -112,7 +110,6 @@ export function BookingForm({ booking, fields, schedules, onSubmit, onCancel }: 
   const startTimeValue = watch("startTime")
   const selectedScheduleId = watch("scheduleId")
 
-  // incluir la cancha actual aunque no venga en "fields"
   const fieldOptions = useMemo(() => {
     const base = [...fields]
     if (booking?.field && !base.includes(booking.field)) base.push(booking.field)
@@ -121,10 +118,8 @@ export function BookingForm({ booking, fields, schedules, onSubmit, onCancel }: 
 
   const selectedDay = useMemo(() => getDayNameFromDate(dateValue), [dateValue])
 
-  // hidratar al abrir edición desde scheduleId
   useEffect(() => {
-    if (!booking) return
-    if (!booking.scheduleId) return
+    if (!booking?.scheduleId) return
 
     const currentSchedule = schedules.find((s) => s._id === booking.scheduleId)
     if (!currentSchedule) return
@@ -150,7 +145,6 @@ export function BookingForm({ booking, fields, schedules, onSubmit, onCancel }: 
       .sort((a, b) => a.time.localeCompare(b.time))
   }, [schedules, fieldValue, selectedDay, booking?.scheduleId])
 
-  // si no hay seleccionado, tomar el de la reserva o el primero
   useEffect(() => {
     if (!scheduleOptions.length) {
       setValue("scheduleId", "", { shouldValidate: true })

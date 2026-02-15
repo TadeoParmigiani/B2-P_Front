@@ -53,7 +53,6 @@ export const AppWithObserver = () => {
      dispatch(observeUser());
    }, [dispatch]);
 
-   // Muestra un loading mientras verifica la autenticación
    if (loading) {
      return (
        <div className="flex items-center justify-center min-h-screen">
