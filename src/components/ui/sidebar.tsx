@@ -1,6 +1,9 @@
 import { useState } from "react";
 import { LayoutDashboard, LogOut, Menu, X, MapPin, Calendar } from "lucide-react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import type { AppDispatch } from "@/store/store";
+import { logoutUser } from "@/features/authSlice";
 
 const navigation = [
   { name: "Dashboard", href: "/", icon: LayoutDashboard },
@@ -11,9 +14,17 @@ const navigation = [
 export function Sidebar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
+  const dispatch = useDispatch<AppDispatch>();
 
   const isActive = (href: string) =>
     href === "/" ? location.pathname === "/" : location.pathname.startsWith(href);
+
+  const handleLogout = async () => {
+    setMobileMenuOpen(false);
+    await dispatch(logoutUser());
+    navigate("/login");
+  };
 
   return (
     <>
@@ -23,7 +34,7 @@ export function Sidebar() {
         onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
         className="fixed top-4 left-4 z-50 lg:hidden p-2 rounded-md text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 transition-colors"
       >
-        {mobileMenuOpen ? <X className="h-6 w-100" /> : <Menu className="h-6 w-6" />}
+        {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
       </button>
 
       {/* Mobile overlay */}
@@ -82,14 +93,13 @@ export function Sidebar() {
 
           {/* Logout */}
           <div className="p-4 border-t border-zinc-800">
-            <Link
-              to="/"
-              onClick={() => setMobileMenuOpen(false)}
+            <button
+              onClick={handleLogout}
               className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100 transition-colors"
             >
               <LogOut className="h-5 w-5" />
               Cerrar sesión
-            </Link>
+            </button>
           </div>
         </div>
       </aside>
