@@ -6,7 +6,6 @@ const Layout = () => {
     <div className="flex h-screen overflow-hidden bg-zinc-950">
       {/* Sidebar */}
       <Sidebar />
-
       {/* Main Content */}
       <div className="flex flex-1 flex-col overflow-hidden lg:ml-64">
         {/* Main Area */}

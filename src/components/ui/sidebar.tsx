@@ -7,8 +7,8 @@ import { logoutUser } from "@/features/authSlice";
 
 const navigation = [
   { name: "Dashboard", href: "/", icon: LayoutDashboard },
-  { name: "Canchas", href: "/filds", icon: MapPin },
-  { name: "Reservas", href: "/reservas", icon: Calendar },
+  { name: "Canchas", href: "/fields", icon: MapPin },
+  { name: "Reservas", href: "/bookings", icon: Calendar },
 ];
 
 export function Sidebar() {
