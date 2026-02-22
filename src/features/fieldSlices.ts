@@ -172,8 +172,6 @@ export const selectActiveFields = (state: { fields: FieldsState }) =>
 export const selectInactiveFields = (state: { fields: FieldsState }) => 
   state.fields.items.filter((field) => !field.isActive);
 
-export const selectFieldsByType = (type: string) => (state: { fields: FieldsState }) => 
-  state.fields.items.filter((field) => field.type === type);
 
 export const selectFieldsLoading = (state: { fields: FieldsState }) => state.fields.loading;
 
@@ -185,12 +183,6 @@ export const selectFieldsStats = (state: { fields: FieldsState }) => {
     total: items.length,
     active: items.filter((field) => field.isActive).length,
     inactive: items.filter((field) => !field.isActive).length,
-    byType: {
-      cancha5: items.filter((f) => f.type === 'CANCHA 5').length,
-      cancha7: items.filter((f) => f.type === 'CANCHA 7').length,
-      cancha11: items.filter((f) => f.type === 'CANCHA 11').length,
-      padel: items.filter((f) => f.type === 'PADEL').length,
-    },
   };
 };
 

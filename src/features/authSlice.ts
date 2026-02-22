@@ -1,16 +1,5 @@
-import {
-  createSlice,
-  createAsyncThunk,
-  type PayloadAction,
-  type Dispatch,
-} from "@reduxjs/toolkit";
-import {
-  signInWithEmailAndPassword,
-  onAuthStateChanged,
-  createUserWithEmailAndPassword,
-  signOut,
-  type User,
-} from "firebase/auth";
+import { createSlice, createAsyncThunk, type PayloadAction, type Dispatch} from "@reduxjs/toolkit";
+import { signInWithEmailAndPassword, onAuthStateChanged, createUserWithEmailAndPassword, signOut, type User, } from "firebase/auth";
 import { auth } from "@/firebase/firebase";
 import type { RootState } from "../store/store";
 import { firebaseAxios } from "@/config/axios";
@@ -62,7 +51,6 @@ export const registerUser = createAsyncThunk<
       await signOut(auth);
       return rejectWithValue('No tienes permisos de administrador.');
     }
-
     return {
       uid: user.uid,
       email: user.email,

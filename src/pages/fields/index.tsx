@@ -33,7 +33,7 @@ export function FieldsPage() {
   const [editingField, setEditingField] = useState<Field | null>(null);
 
   useEffect(() => {
-    dispatch(fetchFields(undefined));
+    dispatch(fetchFields());
   }, [dispatch]);
 
   const handleOpenDialog = (field?: Field) => {
