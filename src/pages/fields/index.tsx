@@ -31,6 +31,7 @@ export function FieldsPage() {
   
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingField, setEditingField] = useState<Field | null>(null);
+  const [formLoading, setFormLoading] = useState(false);
 
   useEffect(() => {
     dispatch(fetchFields());
@@ -54,6 +55,7 @@ export function FieldsPage() {
   };
 
   const handleFormSubmit = async (data: FieldFormType) => {
+    setFormLoading(true);
     try {
       if (editingField) {
         await dispatch(updateField({ 
@@ -63,11 +65,12 @@ export function FieldsPage() {
       } else {
         await dispatch(createField(data)).unwrap();
       }
-      
       setDialogOpen(false);
       setEditingField(null);
     } catch (err: any) {
       console.error("Error al guardar la cancha:", err);
+    } finally {
+      setFormLoading(false);
     }
   };
 
@@ -113,7 +116,7 @@ export function FieldsPage() {
               Nueva Cancha
             </Button>
           </DialogTrigger>
-          <DialogContent className="bg-zinc-900 border-zinc-800">
+          <DialogContent className="bg-zinc-900 border-zinc-800" loading={formLoading}>
             <DialogHeader>
               <DialogTitle className="text-white">
                 {editingField ? "Editar Cancha" : "Nueva Cancha"}
@@ -126,6 +129,7 @@ export function FieldsPage() {
               editingField={editingField}
               onSubmit={handleFormSubmit}
               onCancel={handleCancel}
+              loading={formLoading} // <-- nuevo prop
             />
           </DialogContent>
         </Dialog>
