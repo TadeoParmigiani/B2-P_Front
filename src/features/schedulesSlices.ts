@@ -70,6 +70,5 @@ const schedulesSlice = createSlice({
 });
 
 export const selectAllSchedules = (state: { schedules: SchedulesState }) => state.schedules.items;
-export const selectSchedulesStatus = (state: { schedules: SchedulesState }) => state.schedules.status;
 
 export default schedulesSlice.reducer;

@@ -1,16 +1,5 @@
-import {
-  createSlice,
-  createAsyncThunk,
-  type PayloadAction,
-  type Dispatch,
-} from "@reduxjs/toolkit";
-import {
-  signInWithEmailAndPassword,
-  onAuthStateChanged,
-  createUserWithEmailAndPassword,
-  signOut,
-  type User,
-} from "firebase/auth";
+import { createSlice, createAsyncThunk, type PayloadAction, type Dispatch} from "@reduxjs/toolkit";
+import { signInWithEmailAndPassword, onAuthStateChanged, signOut, type User, } from "firebase/auth";
 import { auth } from "@/firebase/firebase";
 import type { RootState } from "../store/store";
 import { firebaseAxios } from "@/config/axios";
@@ -42,38 +31,6 @@ const getFirebaseErrorMessage = (errorCode: string): string => {
   return errorMessages[errorCode] || 'Error al iniciar sesión. Intenta nuevamente.'
 }
 
-export const registerUser = createAsyncThunk<
-  AuthUser,
-  { email: string; password: string },
-  { rejectValue: string }
->("auth/registerUser", async ({ email, password }, { rejectWithValue }) => {
-  try {
-    const userCredential = await createUserWithEmailAndPassword(
-      auth,
-      email,
-      password
-    );
-    const user = userCredential.user;
-    const token = await user.getIdToken();
-
-    const response = await firebaseAxios.get('/users/verify-admin');
-    
-    if (!response.data.isAdmin) {
-      await signOut(auth);
-      return rejectWithValue('No tienes permisos de administrador.');
-    }
-
-    return {
-      uid: user.uid,
-      email: user.email,
-      token,
-      isAdmin: response.data.isAdmin,
-    };
-  } catch (error: any) {
-    const errorCode = error.code || error.message;
-    return rejectWithValue(getFirebaseErrorMessage(errorCode));
-  }
-});
 
 export const loginUser = createAsyncThunk<
   AuthUser,
@@ -179,18 +136,6 @@ const authSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      .addCase(registerUser.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(registerUser.fulfilled, (state, action) => {
-        state.loading = false;
-        state.user = action.payload;
-      })
-      .addCase(registerUser.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload ?? "Error al registrar usuario";
-      })
       .addCase(loginUser.pending, (state) => {
         state.loading = true;
         state.error = null;

@@ -73,7 +73,7 @@ function DialogTrigger({ children, asChild, onClick, ...props }: DialogTriggerPr
   )
 }
 
-function DialogOverlay({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
+function DialogOverlay({ className, loading = false, ...props }: React.HTMLAttributes<HTMLDivElement> & { loading?: boolean }) {
   const { setOpen } = useDialog()
   
   const classes = `fixed inset-0 z-50 bg-black/80 ${className || ""}`
@@ -81,20 +81,24 @@ function DialogOverlay({ className, ...props }: React.HTMLAttributes<HTMLDivElem
   return (
     <div
       className={classes}
-      onClick={() => setOpen(false)}
+      onClick={() => {
+        if (!loading) setOpen(false)
+      }}
       {...props}
     />
   )
 }
 
-interface DialogContentProps extends React.HTMLAttributes<HTMLDivElement> {}
+interface DialogContentProps extends React.HTMLAttributes<HTMLDivElement> {
+  loading?: boolean
+}
 
-function DialogContent({ className, children, ...props }: DialogContentProps) {
+function DialogContent({ className, children, loading = false, ...props }: DialogContentProps) {
   const { open, setOpen } = useDialog()
   
   React.useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
+      if (e.key === "Escape" && !loading) {
         setOpen(false)
       }
     }
@@ -108,7 +112,7 @@ function DialogContent({ className, children, ...props }: DialogContentProps) {
       document.removeEventListener("keydown", handleEscape)
       document.body.style.overflow = ""
     }
-  }, [open, setOpen])
+  }, [open, setOpen, loading])
 
   if (!open) return null
 
@@ -116,7 +120,7 @@ function DialogContent({ className, children, ...props }: DialogContentProps) {
 
   return (
     <>
-      <DialogOverlay />
+      <DialogOverlay loading={loading} />
       <div
         className={classes}
         {...props}
@@ -126,6 +130,7 @@ function DialogContent({ className, children, ...props }: DialogContentProps) {
           type="button"
           className="absolute right-4 top-4 rounded-sm text-zinc-400 opacity-70 ring-offset-zinc-950 transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:pointer-events-none"
           onClick={() => setOpen(false)}
+          disabled={loading}
         >
           <X className="h-4 w-4" />
           <span className="sr-only">Cerrar</span>

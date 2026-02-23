@@ -23,7 +23,18 @@ export const createFieldValidationSchema = Joi.object({
       'any.only': 'El tipo debe ser: CANCHA 5, CANCHA 7, CANCHA 11',
       'any.required': 'El tipo es requerido'
     }),
-
+    description: Joi.string()
+    .required()
+    .trim()
+    .min(3)
+    .max(100)
+    .messages({
+      'string.base': 'La descripción debe ser un texto',
+      'string.empty': 'La descripción es requerida',
+      'string.min': 'La descripción debe tener al menos 3 caracteres',
+      'string.max': 'La descripción no debe exceder 100 caracteres',
+      'any.required': 'La descripción es requerida'
+    }),
   pricePerHour: Joi.number()
     .positive()
     .precision(2)

@@ -11,9 +11,10 @@ interface FieldFormProps {
   editingField: Field | null
   onSubmit: (data: FieldFormType) => void
   onCancel: () => void
+  loading?: boolean
 }
 
-export function FieldForm({ editingField, onSubmit, onCancel }: FieldFormProps) {
+export function FieldForm({ editingField, onSubmit, onCancel, loading }: FieldFormProps) {
   const validationSchema = editingField ? updateFieldValidationSchema : createFieldValidationSchema
 
   const {
@@ -178,11 +179,15 @@ export function FieldForm({ editingField, onSubmit, onCancel }: FieldFormProps) 
       </div>
 
       <div className="flex justify-end gap-2 pt-4">
-        <Button type="button" variant="outline" onClick={onCancel}>
+        <Button type="button" variant="outline" onClick={onCancel} disabled={loading}>
           Cancelar
         </Button>
-        <Button type="submit" className="bg-green-500 text-zinc-950 hover:bg-green-600">
-          {editingField ? "Guardar cambios" : "Crear cancha"}
+        <Button 
+          type="submit" 
+          className="bg-green-500 text-zinc-950 hover:bg-green-600"
+          disabled={loading}
+        >
+          {loading ? "Guardando..." : editingField ? "Guardar cambios" : "Crear cancha"}
         </Button>
       </div>
     </form>
